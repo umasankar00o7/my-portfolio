@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Snake Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      background: linear-gradient(135deg, #494c4f, #141616);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .game-container {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      width: 100%;
+      max-width: 420px;
+    }
+
+    h1 {
+      color: #f3f7f7;
+      font-size: 2rem;
+      margin-bottom: 20px;
+      text-shadow: 3px 1px 5px rgba(0, 0, 0, 0.6);
+    }
+    h3 {
+      color: #da2222; /* Kept your original color for the typed text */
+      font-size:1rem;
+      margin-bottom: 10px;
+      text-shadow: 3px 1px 5px rgba(0, 0, 0, 0.6);
+      min-height: 1.2em; /* Ensure space for text even when empty */
+    }
+
+    #gameCanvas {
+      background-color: #111;
+      border: 3px solid #ffffffcc;
+      border-radius: 12px;
+      box-shadow: 0 0 15px #ffffffaa;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-width: 400px;
+      touch-action: none;
+    }
+
+    #scoreDisplay {
+      color: #fff;
+      font-size: 1.2rem;
+      margin-top: 20px;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    .action-buttons {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #startBtn {
+      padding: 10px 20px;
+      background-color: #e74c3c;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 10px #e74c3caa;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    #startBtn:hover {
+      background-color: #c0392b;
+    }
+
+    #pauseBtn {
+      padding: 10px 20px;
+      background-color: #f39c12; /* Orange for pause */
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 10px #f39c12aa;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    #pauseBtn:hover:not(:disabled) {
+      background-color: #e67e22; /* Darker orange on hover */
+    }
+
+    #pauseBtn:disabled {
+      background-color: #7f8c8d; /* Muted color when disabled */
+      color: #bdc3c7;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* Styles for the old on-screen controls (now removed, but keeping general .control-btn idea for pause) */
+    /*
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .control-btn {
+      padding: 12px 20px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 10px;
+      background-color: #3498db;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 10px #3498db88;
+    }
+
+    .control-btn:active {
+      background-color: #2980b9;
+    }
+    */
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>Snake Game</h1> <h3><span id="typed-text"></span></h3>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div id="scoreDisplay">Score: 0</div>
+    
+    <div class="action-buttons">
+      <button id="startBtn">Start Game</button>
+      <button id="pauseBtn" disabled>Pause</button>
+    </div>
+
+    <!-- Arrow buttons removed from here -->
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const context = canvas.getContext("2d");
+    const startBtn = document.getElementById("startBtn");
+    const pauseBtn = document.getElementById("pauseBtn"); // Get the pause button
+    const scoreDisplay = document.getElementById("scoreDisplay");
+
+    const boxSize = 20;
+    const totalBoxes = canvas.width / boxSize; // Make it dynamic based on canvas size
+
+    let snakeBody, snakeDirection, foodPosition, gameScore, gameInterval;
+    let isPaused = false; // State for pause functionality
+
+    function initGame() {
+      snakeBody = [{ x: Math.floor(totalBoxes / 4), y: Math.floor(totalBoxes / 2) }]; // Start closer to left-middle
+      snakeDirection = { x: 1, y: 0 }; // Initial direction: right
+      foodPosition = generateFood();
+      gameScore = 0;
+      isPaused = false; // Reset pause state
+      drawGameArea();
+      if (pauseBtn) { // Ensure pauseBtn exists before manipulating
+          pauseBtn.textContent = "Pause";
+          pauseBtn.disabled = true; // Keep it disabled until game actually starts with interval
+      }
+      startBtn.innerText = "Start Game"; // Reset start button text
+    }
+
+    function drawBox(x, y, color) {
+      context.fillStyle = color;
+      context.fillRect(x * boxSize, y * boxSize, boxSize - 1, boxSize - 1); // -1 for slight grid effect
+    }
+
+    function drawGameArea() {
+      // Clear canvas with game background color
+      context.fillStyle = "#111"; // Canvas background
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw food
+      drawBox(foodPosition.x, foodPosition.y, "#e74c3c"); // Red for food
+
+      // Draw snake
+      for (let i = 0; i < snakeBody.length; i++) {
+        const part = snakeBody[i];
+        // Head different color (optional)
+        // const color = (i === 0) ? "#27ae60" : "#2ecc71"; // Darker green for head
+        drawBox(part.x, part.y, "#2ecc71"); // Green for snake
+      }
+
+      scoreDisplay.innerText = "Score: " + gameScore;
+    }
+
+    function drawPausedScreen() {
+        context.fillStyle = "rgba(0, 0, 0, 0.7)";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.font = "bold 30px 'Segoe UI', sans-serif";
+        context.fillStyle = "#f3f7f7";
+        context.textAlign = "center";
+        context.fillText("Paused", canvas.width / 2, canvas.height / 2);
+    }
+
+    function generateFood() {
+      let newFoodPosition;
+      do {
+        newFoodPosition = {
+          x: Math.floor(Math.random() * totalBoxes),
+          y: Math.floor(Math.random() * totalBoxes)
+        };
+      } while (snakeBody && snakeBody.some(segment => segment.x === newFoodPosition.x && segment.y === newFoodPosition.y));
+      // Ensure food doesn't spawn on the snake
+      return newFoodPosition;
+    }
+
+    function moveSnake() {
+      // If paused, do nothing in the game loop tick.
+      // The interval itself is cleared/set by togglePause, so this check isn't strictly necessary
+      // if togglePause is the only way to pause/resume. However, it's a good safeguard.
+      if (isPaused) return;
+
+      const head = { 
+        x: snakeBody[0].x + snakeDirection.x, 
+        y: snakeBody[0].y + snakeDirection.y 
+      };
+
+      // Game Over conditions
+      if (
+        head.x < 0 || head.x >= totalBoxes || 
+        head.y < 0 || head.y >= totalBoxes ||
+        snakeBody.some((segment, index) => index !== 0 && segment.x === head.x && segment.y === head.y) // Don't check head against itself
+      ) {
+        clearInterval(gameInterval);
+        gameInterval = null; // Mark interval as cleared
+        isPaused = false; // Game is over, not paused
+        if (pauseBtn) {
+            pauseBtn.textContent = "Pause";
+            pauseBtn.disabled = true; // Disable pause button on game over
+        }
+        startBtn.innerText = "Restart Game";
+        // Make Game Over alert more prominent or use a modal later
+        setTimeout(() => alert("Game Over! Your Score: " + gameScore), 10); // Timeout to allow canvas to update
+        return;
+      }
+
+      snakeBody.unshift(head);
+
+      if (head.x === foodPosition.x && head.y === foodPosition.y) {
+        gameScore++;
+        foodPosition = generateFood();
+        // Optionally increase speed:
+        // if (gameScore % 5 === 0) { /* increase speed logic */ }
+      } else {
+        snakeBody.pop();
+      }
+
+      drawGameArea();
+    }
+
+    function changeDirection(dir) {
+      if (isPaused) return; // Don't change direction if paused
+
+      const goingUp = snakeDirection.y === -1;
+      const goingDown = snakeDirection.y === 1;
+      const goingLeft = snakeDirection.x === -1;
+      const goingRight = snakeDirection.x === 1;
+
+      if (dir === 'up' && !goingDown) {
+        snakeDirection = { x: 0, y: -1 };
+      } else if (dir === 'down' && !goingUp) {
+        snakeDirection = { x: 0, y: 1 };
+      } else if (dir === 'left' && !goingRight) {
+        snakeDirection = { x: -1, y: 0 };
+      } else if (dir === 'right' && !goingLeft) {
+        snakeDirection = { x: 1, y: 0 };
+      }
+    }
+
+    function togglePause() {
+        // Only allow toggle if game has an active interval or is already paused
+        if (!gameInterval && !isPaused) {
+             // This condition means game hasn't started or is over.
+             // startBtn.click() handles enabling pause button.
+            return;
+        }
+
+        isPaused = !isPaused;
+
+        if (isPaused) {
+            clearInterval(gameInterval);
+            // gameInterval is now undefined/null after clearing
+            pauseBtn.textContent = "Resume";
+            drawPausedScreen(); // Show "Paused" message
+        } else {
+            // Resuming
+            if (snakeBody) { // Ensure game state exists to resume
+                gameInterval = setInterval(moveSnake, 150); // Restart game loop
+                pauseBtn.textContent = "Pause";
+                drawGameArea(); // Immediately redraw game state
+            } else {
+                // Should not happen if button is managed correctly, but as a fallback:
+                isPaused = true; // Revert to paused state
+                pauseBtn.textContent = "Resume";
+            }
+        }
+    }
+
+    document.addEventListener("keydown", function (event) {
+      // Allow pause key even if gameInterval is null but isPaused is true (to resume)
+      if (event.key === 'p' || event.key === 'P') {
+        if (gameInterval || isPaused) { // Check if game is running or already paused
+            togglePause();
+        }
+        return; // Prevent P key from doing anything else
+      }
+      
+      // If game is paused, don't process movement keys
+      if (isPaused) return;
+
+      if (event.key === "ArrowUp") {
+        changeDirection('up');
+      } else if (event.key === "ArrowDown") {
+        changeDirection('down');
+      } else if (event.key === "ArrowLeft") {
+        changeDirection('left');
+      } else if (event.key === "ArrowRight") {
+        changeDirection('right');
+      }
+    });
+
+    if (pauseBtn) {
+        pauseBtn.addEventListener("click", togglePause);
+    }
+
+    startBtn.addEventListener("click", () => {
+      clearInterval(gameInterval); // Clear any existing interval (e.g., if paused)
+      initGame(); // This will set isPaused = false and disable pauseBtn initially
+      isPaused = false; // Explicitly ensure not paused
+      if (pauseBtn) {
+          pauseBtn.textContent = "Pause";
+          pauseBtn.disabled = false; // Enable pause button now that game is starting
+      }
+      gameInterval = setInterval(moveSnake, 150);
+    });
+
+    // Swipe gesture handling
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    canvas.addEventListener("touchstart", function (e) {
+      e.preventDefault(); // Prevent page scrolling on canvas touch
+      if (isPaused) return; // Don't register touches if paused
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    });
+
+    canvas.addEventListener("touchend", function (e) {
+      e.preventDefault();
+      if (isPaused) return;
+      if (e.changedTouches.length === 0) return; // No touches to process
+
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - touchStartX;
+      const deltaY = touch.clientY - touchStartY;
+      const absDeltaX = Math.abs(deltaX);
+      const absDeltaY = Math.abs(deltaY);
+
+      // Minimum swipe distance
+      const swipeThreshold = 20; 
+
+      if (absDeltaX > swipeThreshold || absDeltaY > swipeThreshold) {
+        if (absDeltaX > absDeltaY) { // Horizontal swipe
+          if (deltaX > 0) { // Right
+            changeDirection("right");
+          } else { // Left
+            changeDirection("left");
+          }
+        } else { // Vertical swipe
+          if (deltaY > 0) { // Down
+            changeDirection("down");
+          } else { // Up
+            changeDirection("up");
+          }
+        }
+      }
+    });
+    
+    // Initialize game display but don't start loop
+    initGame(); 
+  </script>
+  <script>
+  // Your existing typing animation script - untouched
+  const roles = [
+    " - Uma sankar",
+  ];
+  let i = 0, j = 0, current = "", isDeleting = false;
+
+  function type() {
+    const display = document.getElementById("typed-text");
+    if (!display) return;
+
+    if (i < roles.length) {
+      if (!isDeleting && j <= roles[i].length) {
+        current = roles[i].substring(0, j++);
+        display.innerHTML = current + "<span style='opacity:0.7;'>|</span>"; // Softer cursor
+      } else if (isDeleting && j > 0) {
+        current = roles[i].substring(0, j--);
+        display.innerHTML = current + "<span style='opacity:0.7;'>|</span>";
+      }
+
+      if (j === roles[i].length + 1 && !isDeleting) { // Pause after typing full text
+        isDeleting = true;
+        setTimeout(type, 1500); // Longer pause
+        return;
+      }
+
+      if (j === 0 && isDeleting) {
+        isDeleting = false;
+        i = (i + 1) % roles.length; // Loop through roles
+        setTimeout(type, 300); // Pause before typing next role
+        return;
+      }
+      setTimeout(type, isDeleting ? 50 : 100); // Typing/deleting speed
+    }
+  }
+  // Ensure DOM is loaded before trying to getElementById
+  document.addEventListener('DOMContentLoaded', (event) => {
+    type();
+    // Call initGame here again if you want to ensure canvas is ready,
+    // but your original placement at the end of the first script tag is likely fine.
+    // If initGame() was called before canvas was fully ready, totalBoxes might be NaN.
+    // For safety, you could move initGame() call to here or ensure script is at end of body.
+    // Since your script is at the end of body, initGame() should be fine.
+  });
+</script>
+</body>
+</html>

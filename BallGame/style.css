@@ -1,0 +1,236 @@
+/* Global Styles & Creative Touches */
+:root {
+    --primary-color: #3498db; /* Bright Blue */
+    --secondary-color: #2ecc71; /* Emerald Green */
+    --accent-color: #e74c3c; /* Alizarin Red */
+    --background-color: #ecf0f1; /* Clouds White */
+    --text-color: #2c3e50; /* Midnight Blue */
+    --light-shadow: rgba(0, 0, 0, 0.1);
+    --dark-shadow: rgba(0, 0, 0, 0.2);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: var(--text-color);
+    overflow: hidden; /* Prevents scrollbars during minor layout shifts */
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+.game-wrapper {
+    background-color: var(--background-color);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px var(--dark-shadow);
+    padding: clamp(20px, 4vw, 40px);
+    width: 100%;
+    max-width: 600px; /* Max width for desktop, good for typical game aspect */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.game-header h1 {
+    margin: 0 0 10px 0;
+    font-size: clamp(1.8em, 5vw, 2.5em);
+    color: var(--primary-color);
+    text-shadow: 1px 1px 2px var(--light-shadow);
+}
+
+.score-board {
+    font-size: clamp(1em, 3vw, 1.3em);
+    font-weight: bold;
+    color: var(--secondary-color);
+}
+
+/* Game Arena - The Play Area */
+.game-arena {
+    width: 100%;
+    /* Aspect ratio trick for responsive height based on width */
+    padding-top: 75%; /* Adjust for desired aspect ratio (e.g., 4:3) */
+    /* For a fixed height approach, you could use:
+       height: clamp(300px, 60vh, 450px); */
+    background-color: #ffffff;
+    border: 3px solid var(--primary-color);
+    border-radius: 10px;
+    position: relative; /* Crucial for positioning ball and paddle */
+    overflow: hidden; /* Keeps elements inside */
+    cursor: none; /* Hide mouse cursor over game area when active */
+    box-shadow: inset 0 0 15px var(--light-shadow);
+}
+
+.ball {
+    width: clamp(15px, 4vw, 25px); /* Responsive ball size */
+    height: clamp(15px, 4vw, 25px);
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    position: absolute; /* Positioned relative to game-arena */
+    box-shadow: 0 2px 5px var(--dark-shadow);
+    transition: transform 0.05s linear; /* Smooths movement slightly if needed */
+}
+
+.paddle {
+    width: clamp(80px, 25vw, 120px); /* Responsive paddle width */
+    height: clamp(10px, 3vw, 15px);
+    background-color: var(--text-color);
+    border-radius: 5px;
+    position: absolute; /* Positioned relative to game-arena */
+    bottom: 20px; /* Initial position from bottom */
+    box-shadow: 0 2px 5px var(--dark-shadow);
+}
+
+/* Message Overlay */
+.message-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(236, 240, 241, 0.85); /* Semi-transparent overlay */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 10; /* Ensures it's on top */
+    border-radius: inherit; /* Inherit from game-arena */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.message-overlay p {
+    font-size: clamp(1.1em, 4vw, 1.6em);
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+
+#startButton, .restart-button /* Shared style for potential future restart button */ {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: clamp(0.9em, 3vw, 1.2em);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 3px 6px var(--light-shadow);
+    font-weight: bold;
+}
+
+#startButton:hover, .restart-button:hover {
+    background-color: #27ae60; /* Darker green */
+}
+
+#startButton:active, .restart-button:active {
+    transform: scale(0.97);
+}
+
+/* Hide class for JS control */
+.hidden {
+    display: none !important;
+}
+
+.game-footer {
+    font-size: clamp(0.8em, 2vw, 1em);
+    color: var(--background-color);
+    opacity: 0.8;
+}
+
+/* Mobile Specific Considerations (if any beyond clamp/flex) */
+@media (max-width: 480px) {
+    .game-header h1 {
+        font-size: 1.5em;
+    }
+    .score-board {
+        font-size: 0.9em;
+    }
+    .paddle {
+        bottom: 10px; /* Slightly less padding on small screens */
+    }
+}
+/* ... (your existing CSS rules) ... */
+
+/* ... (your existing CSS for .game-header, h1, .score-board etc.) ... */
+
+/* Ensure h1 has some bottom margin if byline is directly under it */
+.game-header h1 {
+    margin: 0 0 5px 0; /* Reduced bottom margin slightly */
+    font-size: clamp(1.8em, 5vw, 2.5em);
+    color: var(--primary-color);
+    text-shadow: 1px 1px 2px var(--light-shadow);
+}
+
+/* NEW STYLES for Byline under Heading */
+.byline-heading-container {
+    font-size: clamp(0.8em, 2.5vw, 1.1em); /* Adjust size as needed */
+    color: var(--text-color); /* Or a different subtle color */
+    margin-bottom: 15px; /* Space before the score board */
+    height: 1.5em; /* Reserve space to prevent layout shift */
+    text-align: center; /* Center the byline */
+    font-style: italic;
+    display: block; /* Make it a block to sit under h1 nicely */
+}
+
+#bylinePrefix, /* Shared styles for prefix and name */
+#bylineName {
+    display: inline; /* Keep them on the same line */
+}
+
+#bylinePrefix {
+    /* "Crafted by a Pro & Genius: " (29 characters) */
+    white-space: nowrap;
+    overflow: hidden;
+    animation: typingPrefixHeading 2.5s steps(29, end) forwards;
+    max-width: 0; /* Start with no width */
+}
+
+#bylineName {
+    /* "Uma sankar" (10 characters) */
+    font-weight: bold;
+    color: #e67e22; /* A confident orange/gold */
+    white-space: nowrap;
+    overflow: hidden;
+    border-right: 0.1em solid #e67e22; /* Blinking cursor */
+    animation: typingNameHeading 1.5s steps(10, end) forwards,
+               blink-caret-byline-heading .75s step-end infinite;
+    max-width: 0; /* Start with no width */
+    animation-delay: 2.5s; /* Delay start of name typing after prefix finishes */
+}
+
+/* Keyframe animations for heading byline */
+@keyframes typingPrefixHeading {
+    from { max-width: 0; }
+    to { max-width: 100%; }
+}
+
+@keyframes typingNameHeading {
+    from { max-width: 0; }
+    to { max-width: 100%; }
+}
+
+@keyframes blink-caret-byline-heading {
+    from, to { border-color: transparent; }
+    50% { border-color: #e67e22; }
+}
+
+
+/* REMOVE or comment out the old .game-footer byline styles if they exist:
+   e.g.
+    .game-footer #bylineContainer { ... }
+    #bylineName { ... animation: typingName 2s ... }
+    @keyframes typingName { ... }
+    @keyframes blink-caret-byline { ... }
+*/
+.game-footer { /* Simpler footer style now */
+    font-size: clamp(0.8em, 2vw, 1em);
+    color: var(--background-color);
+    opacity: 0.8;
+    text-align: center;
+    padding-top: 10px;
+}

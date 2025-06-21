@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Cricket Pro!</title>
+    <style>
+        :root {
+            --bg-main: #1a202c; /* Dark Slate */
+            --bg-container: #2d3748; /* Slightly Lighter Slate */
+            --text-light: #e2e8f0; /* Light Grayish Blue */
+            --text-dark: #1a202c;
+            --accent-primary: #f6e05e; /* Vibrant Yellow */
+            --accent-secondary: #63b3ed; /* Sky Blue */
+            --byline-color: #a0aec0; /* Medium Gray */
+            --countdown-color: #48bb78; /* Green */
+            --countdown-go-color: #f56565; /* Red for GO! emphasis */
+            --out-color: #e53e3e;   /* Strong Red */
+            --runs-color: #38a169; /* Strong Green */
+            --shadow-color-light: rgba(0,0,0,0.15);
+            --shadow-color-strong: rgba(0,0,0,0.3);
+            --border-radius: 10px;
+            --border-radius-small: 6px;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-main);
+            color: var(--text-light);
+            padding: 15px;
+            box-sizing: border-box;
+            text-align: center;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            background-color: var(--bg-container);
+            padding: clamp(25px, 5vw, 40px);
+            border-radius: var(--border-radius);
+            box-shadow: 0 12px 35px var(--shadow-color-strong);
+            width: 100%;
+            max-width: 500px; /* Optimal for 5 buttons */
+            border: 3px solid transparent;
+            transition: border-color 0.1s ease-out;
+        }
+        .game-container.out-flash-effect {
+            animation: outBorderFlash 0.4s ease-out;
+        }
+        @keyframes outBorderFlash {
+            0%, 100% { border-color: transparent; }
+            50% { border-color: var(--out-color); box-shadow: 0 0 20px var(--out-color); }
+        }
+
+        h1 {
+            color: var(--accent-primary);
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-size: clamp(2em, 6vw, 2.8em);
+            font-weight: 700;
+        }
+
+        .byline {
+            font-size: clamp(0.85em, 2.8vw, 1.05em);
+            color: var(--byline-color);
+            margin-bottom: clamp(20px, 4vh, 30px);
+            height: 1.6em;
+            font-style: italic;
+        }
+        #bylineText {
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 0.1em solid var(--byline-color);
+            max-width: 0;
+            display: inline-block;
+            vertical-align: middle;
+            /* JS will handle animation reset and re-application */
+        }
+        /* Keyframes for byline are still useful for CSS definition */
+        @keyframes typingBylineAnim { from { max-width: 0; } to { max-width: 100%; } }
+        @keyframes blinkCaretBylineAnim { from, to { border-color: transparent; } 50% { border-color: var(--byline-color); } }
+
+
+        .countdown-display {
+            font-size: clamp(2.5em, 10vw, 4em);
+            font-weight: bold;
+            color: var(--countdown-color);
+            margin-bottom: clamp(15px, 3vh, 25px);
+            min-height: 1.2em; /* Prevent layout shift */
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .countdown-display.go-text {
+            color: var(--countdown-go-color);
+            transform: scale(1.2);
+            animation: goTextPulse 0.5s ease-out;
+        }
+        @keyframes goTextPulse {
+            0% { transform: scale(1.2); }
+            50% { transform: scale(1.35); }
+            100% { transform: scale(1.2); }
+        }
+        .countdown-display.hidden { display: none; }
+
+
+        .choices-area {
+            display: flex;
+            justify-content: space-between; /* Even spacing for 5 buttons */
+            align-items: center;
+            margin-bottom: clamp(25px, 5vh, 35px);
+            opacity: 1;
+            transition: opacity 0.2s ease-out;
+        }
+        .choices-area.interaction-disabled {
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        .choice-button {
+            background-color: var(--accent-secondary);
+            color: var(--text-dark);
+            border: 3px solid transparent;
+            border-radius: var(--border-radius-small);
+            width: clamp(50px, 13vw, 65px);
+            height: clamp(50px, 13vw, 65px);
+            font-size: clamp(1.6em, 5.5vw, 2.3em);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Bouncy transition */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 10px var(--shadow-color-light);
+        }
+        .choice-button.can-choose { /* When it's time to pick */
+             opacity: 1 !important;
+             pointer-events: auto !important;
+             border-color: var(--accent-primary);
+             animation: canChoosePulse 0.7s infinite alternate;
+        }
+        @keyframes canChoosePulse {
+            from { box-shadow: 0 5px 10px var(--shadow-color-light), 0 0 3px var(--accent-primary); }
+            to   { box-shadow: 0 7px 14px var(--shadow-color-strong), 0 0 10px var(--accent-primary); }
+        }
+        .choice-button.player-selected { /* Visual feedback for player's own click */
+            background-color: var(--accent-primary) !important;
+            color: var(--text-dark) !important;
+            transform: scale(1.1) !important;
+            box-shadow: 0 0 15px var(--accent-primary) !important;
+            border-color: var(--text-light) !important;
+        }
+        .choice-button:hover:not(.permanently-disabled):not(.can-choose) { /* Normal hover */
+            background-color: #4299e1; /* Darker Sky Blue */
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px var(--shadow-color-strong);
+        }
+        .choice-button:active:not(.permanently-disabled) {
+            transform: scale(0.95) !important;
+        }
+        .choice-button.permanently-disabled {
+            background-color: #4a5568; /* Darker Gray for disabled */
+            cursor: not-allowed;
+            opacity: 0.4;
+            transform: none;
+            box-shadow: 0 2px 4px var(--shadow-color-light);
+            border-color: transparent;
+        }
+
+
+        .results-area {
+            margin-bottom: clamp(20px, 4vh, 30px);
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .player-choices {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            font-size: clamp(2em, 7vw, 3.2em);
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .player-choices span {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: rgba(255,255,255,0.05);
+            border-radius: var(--border-radius-small);
+            min-width: 1.6em;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+        .player-choices span.show-choice {
+            opacity: 1;
+            transform: translateY(0px);
+        }
+
+        #resultText {
+            font-size: clamp(1.2em, 4vw, 1.7em);
+            font-weight: 600; /* Bold but not too heavy */
+            transition: color 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+            min-height: 1.3em;
+            opacity: 0; /* Start hidden, JS will reveal */
+        }
+        #resultText.show-result {
+            opacity: 1;
+            animation: resultTextAppear 0.4s ease-out;
+        }
+        @keyframes resultTextAppear {
+            from { opacity: 0; transform: translateY(10px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        #resultText.out-text-effect { color: var(--out-color); animation: outTextShake 0.5s ease-in-out, resultTextAppear 0.4s ease-out; }
+        #resultText.runs-text-effect { color: var(--runs-color); animation: runsTextPop 0.4s ease-out, resultTextAppear 0.4s ease-out; }
+
+        @keyframes outTextShake { /* Same as before */ }
+        @keyframes runsTextPop {
+            0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); }
+        }
+
+        .score-area {
+            font-size: clamp(1.3em, 4.5vw, 1.6em);
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: clamp(20px, 4vh, 30px);
+            transition: transform 0.2s ease-out;
+        }
+        .score-area.score-pop-effect { animation: scorePopAnim 0.3s ease-out; }
+        @keyframes scorePopAnim { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        .score-area .label { font-size: 0.65em; color: var(--text-light); display: block; margin-bottom: -0.1em; font-weight: 400;}
+
+
+        .action-button { /* Replaces startGameButton */
+            margin-top: clamp(15px, 3vh, 25px);
+            background: linear-gradient(45deg, var(--accent-primary), #f57c00); /* Yellow to Orange */
+            color: var(--text-dark);
+            border: none;
+            padding: clamp(14px, 3vw, 18px) clamp(30px, 6vw, 40px);
+            font-size: clamp(1.1em, 3.5vw, 1.35em);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            font-weight: 700; /* Bolder button text */
+            box-shadow: 0 4px 15px var(--shadow-color-light);
+            text-transform: uppercase; /* More button-like */
+            letter-spacing: 0.5px;
+        }
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px var(--shadow-color-strong);
+        }
+        .action-button.hidden {
+             opacity: 0;
+             pointer-events: none;
+             transform: translateY(10px); /* Slide out */
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <h1>Hand Cricket</h1>
+        <div class="byline"><span id="bylineText"></span></div>
+
+        <div class="score-area" id="playerScoreArea">
+            <span class="label">YOUR SCORE</span>
+            <span id="playerScoreDisplay">0</span>
+        </div>
+
+        <div class="countdown-display hidden" id="countdownDisplay">3</div>
+
+        <div class="choices-area" id="choicesArea">
+            <button class="choice-button" data-choice="1">1</button>
+            <button class="choice-button" data-choice="2">2</button>
+            <button class="choice-button" data-choice="3">3</button>
+            <button class="choice-button" data-choice="4">4</button>
+            <button class="choice-button" data-choice="5">5</button>
+        </div>
+
+        <div class="results-area">
+            <div class="player-choices">
+                <div>You: <span id="playerChoiceDisplay">?</span></div>
+                <div>CPU: <span id="cpuChoiceDisplay">?</span></div>
+            </div>
+            <div id="resultText">Press "Start Batting" to play!</div>
+        </div>
+
+        <button class="action-button" id="actionButton">Start Batting</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gameContainer = document.getElementById('gameContainer');
+            const choicesArea = document.getElementById('choicesArea');
+            const choiceButtons = document.querySelectorAll('.choice-button');
+            const playerChoiceDisplay = document.getElementById('playerChoiceDisplay');
+            const cpuChoiceDisplay = document.getElementById('cpuChoiceDisplay');
+            const resultText = document.getElementById('resultText');
+            const playerScoreArea = document.getElementById('playerScoreArea');
+            const playerScoreDisplay = document.getElementById('playerScoreDisplay');
+            const actionButton = document.getElementById('actionButton');
+            const countdownDisplay = document.getElementById('countdownDisplay');
+            const bylineTextElement = document.getElementById('bylineText');
+
+            const CHOICES = [1, 2, 3, 4, 5];
+            const COUNTDOWN_START = 3;
+            const PLAYER_CHOICE_WINDOW_MS = 1000; // 1 second for player to choose after GO
+
+            let playerScore = 0;
+            let countdownTimerId = null;
+            let resolveRoundTimeoutId = null;
+            let playerCanChoose = false;
+            let roundInProgress = false;
+            let playerChoiceForRound = null;
+            let isGameOver = false;
+
+            function typeByline() {
+                const text = "by Uma sankar";
+                bylineTextElement.textContent = '';
+                bylineTextElement.style.maxWidth = '0';
+                bylineTextElement.style.animation = 'none';
+                void bylineTextElement.offsetHeight;
+                bylineTextElement.textContent = text;
+                bylineTextElement.style.animation = `typingBylineAnim 2s steps(${text.length}, end) 0.5s forwards, blinkCaretBylineAnim .75s step-end 0.5s infinite`;
+            }
+
+            function getComputerChoice() {
+                return CHOICES[Math.floor(Math.random() * CHOICES.length)];
+            }
+
+            function updatePlayerChoiceDisplay(choice) {
+                playerChoiceDisplay.textContent = choice !== null ? choice : '?';
+                playerChoiceDisplay.classList.toggle('show-choice', choice !== null);
+            }
+            function updateCpuChoiceDisplay(choice) {
+                cpuChoiceDisplay.textContent = choice !== null ? choice : '?';
+                cpuChoiceDisplay.classList.toggle('show-choice', choice !== null);
+            }
+
+            function updateScore(runs) {
+                playerScore += runs;
+                playerScoreDisplay.textContent = playerScore;
+                playerScoreArea.classList.add('score-pop-effect');
+                setTimeout(() => playerScoreArea.classList.remove('score-pop-effect'), 300);
+            }
+
+            function displayResult(outcome, playerNum, cpuNum) {
+                resultText.classList.remove('out-text-effect', 'runs-text-effect', 'show-result');
+                // Force reflow to restart animation
+                void resultText.offsetHeight;
+
+                let message = "";
+                if (outcome === 'out') {
+                    message = `OUT! Both showed ${playerNum}.`;
+                    resultText.classList.add('out-text-effect');
+                    gameContainer.classList.add('out-flash-effect');
+                    setTimeout(() => gameContainer.classList.remove('out-flash-effect'), 400);
+                } else if (outcome === 'runs') {
+                    message = `You scored ${playerNum} run(s)!`;
+                    resultText.classList.add('runs-text-effect');
+                }
+                resultText.textContent = message;
+                resultText.classList.add('show-result');
+            }
+
+            function startRound() {
+                if (roundInProgress || isGameOver) return;
+                roundInProgress = true;
+                playerChoiceForRound = null;
+
+                actionButton.classList.add('hidden');
+                setChoiceButtonsState('dimmed');
+                countdownDisplay.classList.remove('hidden', 'go-text');
+                resultText.classList.remove('show-result'); // Hide previous result
+                resultText.textContent = "Get Ready...";
+                resultText.classList.add('show-result'); // Animate "Get Ready"
+                updatePlayerChoiceDisplay(null);
+                updateCpuChoiceDisplay(null);
+
+                let count = COUNTDOWN_START;
+                countdownDisplay.textContent = count;
+
+                clearTimeout(countdownTimerId); // Clear any existing timer
+                countdownTimerId = setInterval(() => {
+                    count--;
+                    if (count > 0) {
+                        countdownDisplay.textContent = count;
+                        countdownDisplay.classList.remove('go-text');
+                    } else if (count === 0) {
+                        countdownDisplay.textContent = "GO!";
+                        countdownDisplay.classList.add('go-text');
+                        playerCanChoose = true;
+                        setChoiceButtonsState('active');
+                        clearTimeout(resolveRoundTimeoutId); // Clear previous if any
+                        resolveRoundTimeoutId = setTimeout(resolveRound, PLAYER_CHOICE_WINDOW_MS);
+                    } else {
+                        clearInterval(countdownTimerId); // Should be cleared by resolveRound
+                    }
+                }, 800);
+            }
+
+            function handlePlayerChoice(event) {
+                if (!playerCanChoose || !roundInProgress) return;
+                const choiceElement = event.target.closest('.choice-button');
+                if (!choiceElement) return;
+
+                playerChoiceForRound = parseInt(choiceElement.dataset.choice);
+                playerCanChoose = false; // Lock choice
+
+                // Visual feedback for selected button
+                choiceButtons.forEach(btn => btn.classList.remove('player-selected'));
+                choiceElement.classList.add('player-selected');
+
+                // Optional: Resolve round immediately after player choice
+                // clearTimeout(resolveRoundTimeoutId);
+                // resolveRound();
+                // For this version, we'll stick to the timed window
+            }
+
+            function resolveRound() {
+                if (!roundInProgress) return; // Prevent multiple resolutions
+
+                clearInterval(countdownTimerId);
+                playerCanChoose = false;
+                roundInProgress = false;
+
+                countdownDisplay.classList.add('hidden');
+                countdownDisplay.classList.remove('go-text');
+                setChoiceButtonsState('disabled'); // Fully disable after choice window
+
+                const cpuChoice = getComputerChoice();
+                // If player didn't choose, assign a default (e.g., 1) or random
+                const finalPlayerChoice = playerChoiceForRound !== null ? playerChoiceForRound : CHOICES[0];
+
+                updatePlayerChoiceDisplay(finalPlayerChoice);
+                // Stagger CPU choice reveal slightly for drama
+                setTimeout(() => {
+                    updateCpuChoiceDisplay(cpuChoice);
+
+                    if (finalPlayerChoice === cpuChoice) {
+                        displayResult('out', finalPlayerChoice, cpuChoice);
+                        endGame();
+                    } else {
+                        updateScore(finalPlayerChoice);
+                        displayResult('runs', finalPlayerChoice, cpuChoice);
+                        actionButton.textContent = "Next Ball";
+                        actionButton.classList.remove('hidden');
+                    }
+                }, 300); // CPU choice reveal delay
+
+                playerChoiceForRound = null; // Reset for next potential round
+            }
+
+            function endGame() {
+                isGameOver = true;
+                // Result text for "OUT" is already set by displayResult.
+                // We can append or update the game over message after a slight delay.
+                setTimeout(() => {
+                    // Ensure resultText is not null and has content before appending
+                    let currentResultMessage = resultText.textContent || "";
+                    if (currentResultMessage.includes("OUT!")) { // Check if "OUT" message is already there
+                        resultText.innerHTML = `${currentResultMessage}<br>Game Over! Final Score: ${playerScore}`;
+                    } else { // Fallback if "OUT" wasn't the direct cause (shouldn't happen in 1-wicket game)
+                        resultText.innerHTML = `Game Over! Final Score: ${playerScore}`;
+                    }
+                    resultText.classList.add('show-result'); // Re-ensure it's visible and animates
+                }, 500); // Delay to let "OUT" visuals sink in
+                actionButton.textContent = "Play Again";
+                actionButton.classList.remove('hidden');
+            }
+
+            function resetGame() {
+                playerScore = 0;
+                playerScoreDisplay.textContent = playerScore;
+                isGameOver = false;
+                roundInProgress = false;
+                playerChoiceForRound = null;
+
+                resultText.textContent = 'Press "Start Batting" to play!';
+                resultText.classList.remove('out-text-effect', 'runs-text-effect'); // Clear specific result effects
+                resultText.classList.add('show-result'); // Make initial text visible
+
+                updatePlayerChoiceDisplay(null);
+                updateCpuChoiceDisplay(null);
+                countdownDisplay.classList.add('hidden');
+                countdownDisplay.classList.remove('go-text');
+                setChoiceButtonsState('initial-disabled');
+
+                actionButton.textContent = "Start Batting";
+                actionButton.classList.remove('hidden');
+            }
+
+            function setChoiceButtonsState(state) {
+                // First, remove all state-specific classes from choicesArea and buttons
+                choicesArea.classList.remove('interaction-disabled');
+                choiceButtons.forEach(button => {
+                    button.classList.remove('can-choose', 'permanently-disabled', 'player-selected');
+                });
+
+                // Then, apply the new state
+                if (state === 'dimmed') {
+                    choicesArea.classList.add('interaction-disabled');
+                } else if (state === 'active') {
+                    choiceButtons.forEach(button => button.classList.add('can-choose'));
+                } else if (state === 'disabled' || state === 'initial-disabled') {
+                    choicesArea.classList.add('interaction-disabled');
+                    choiceButtons.forEach(button => button.classList.add('permanently-disabled'));
+                }
+            }
+
+            choiceButtons.forEach(button => button.addEventListener('click', handlePlayerChoice));
+            actionButton.addEventListener('click', () => {
+                if (isGameOver) {
+                    resetGame();
+                }
+                // Allow starting a new round only if no round is currently in progress
+                if (!roundInProgress) {
+                    startRound();
+                }
+            });
+
+            function initializeApp() {
+                typeByline();
+                resetGame();
+            }
+            initializeApp();
+
+            // Helper: Capitalize (though not directly used in current result text, good to have)
+            function capitalize(word) {
+                if (!word || typeof word !== 'string') return '';
+                return word.charAt(0).toUpperCase() + word.slice(1);
+            }
+        });
+    </script>
+</body>
+</html>

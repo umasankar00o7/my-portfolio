@@ -1,0 +1,154 @@
+/* print-styles.css - For Uma Sankar K Portfolio */
+
+@media print { /* Ensures these styles ONLY apply during printing */
+
+  body {
+    font-family: 'Inter', sans-serif; /* Or a standard serif font like 'Times New Roman', serif */
+    font-size: 11pt; /* Adjust for readability */
+    line-height: 1.4;
+    background-color: #ffffff !important; /* Force white background */
+    color: #000000 !important; /* Force black text */
+    margin: 1.5cm !important; /* Decent margins for printing */
+    -webkit-print-color-adjust: exact !important; /* Force browsers to print background colors/images if any are kept */
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide elements not useful for print */
+  nav.navbar,
+  #scroll-progress-bar,
+  .hero-actions-interactive, /* Like/Share buttons */
+  #fabPortfolioShareButton,  /* Floating share button */
+  #backToTopBtn,
+  .theme-toggle-container,
+  #preloader, /* Though it should be gone by print time */
+  .offcanvas, /* Any off-canvas menus */
+  .modal, /* Any modals, though usually not open during print */
+  footer .profile-menu-social-links, /* Social links in offcanvas if you added them to footer too */
+  footer .d-flex.flex-wrap.justify-content-center.gap-3.mb-5.pb-3, /* Contact link buttons */
+  #contact form button[type="submit"], /* Hide contact form submit button */
+  #games .btn, /* Hide "Play Now" buttons for games */
+  #projects .btn-primary-action, /* Hide "View Details" for projects on print */
+  #projects .btn-outline-accent, /* Hide "Live Demo" for projects on print */
+  .project-modal-links, /* Hide links within project modals if they were somehow visible */
+  .carousel-control-prev, .carousel-control-next, .carousel-indicators, /* Hide carousel controls */
+  [data-aos] /* Attempt to reset AOS elements if they are transformed weirdly for print */
+  {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Ensure main sections are visible and flow well */
+  section {
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
+    margin-bottom: 20px !important;
+    page-break-inside: avoid !important; /* Try to avoid breaking sections across pages */
+  }
+
+  .container {
+    max-width: 100% !important; /* Allow container to use full page width within margins */
+    width: auto !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  h1, h2, h3, h4, h5, h6, .section-title, .skills-subtitle {
+    color: #000000 !important;
+    page-break-after: avoid !important; /* Don't break page right after a heading */
+    page-break-inside: avoid !important;
+  }
+  .section-title::after, .skills-subtitle::after {
+    display: none !important; /* Hide decorative underlines */
+  }
+
+  /* Links - make them look like normal text but show URL */
+  a {
+    color: #000000 !important;
+    text-decoration: none !important; /* No underline for cleaner print */
+  }
+  /* Show URLs for external links */
+  a[href^="http"]::after,
+  a[href^="mailto"]::after {
+    content: " (" attr(href) ")";
+    font-size: 90%;
+    font-weight: normal;
+    color: #333333 !important;
+  }
+  /* Don't show URLs for internal page links */
+  a[href^="#"]::after {
+    content: "" !important;
+  }
+  
+  /* Images */
+  img {
+    max-width: 100% !important; /* Ensure images don't overflow */
+    height: auto !important;
+    page-break-inside: avoid !important;
+  }
+  #about .img-fluid.profile-image-zoomed {
+    /* Make the main profile image a bit smaller for print */
+    width: 150px !important;
+    height: auto !important; /* Maintain aspect ratio */
+    aspect-ratio: 340 / 460; /* Your original aspect ratio */
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    padding: 0 !important;
+    float: right; /* Example: float it next to text */
+    margin: 0 0 15px 15px !important;
+  }
+
+
+  /* Skill cards - simplify for print */
+  .skill-card-interactive {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    padding: 10px !important;
+    page-break-inside: avoid !important;
+  }
+  .skill-card-interactive .skill-icon {
+    font-size: 1.5rem !important; /* Smaller icon */
+    margin-bottom: 5px !important;
+  }
+  .skill-card-interactive .skill-name {
+    font-size: 0.9rem !important;
+  }
+  .skill-proficiency-container { /* Hide proficiency bars for print */
+    display: none !important;
+  }
+
+  /* Project/Game Cards - simplify */
+  .project-card, .game-card {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    padding: 10px !important;
+  }
+  .project-card .card-body, .game-card .card-body {
+      padding: 10px !important;
+  }
+
+  /* Contact Form - Maybe just show contact info, hide the form */
+  #contact form {
+    /* display: none !important; */ /* Option: hide form */
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    padding: 15px !important;
+  }
+  /* You might want to add a section before the form with your direct email/LinkedIn for print */
+
+  /* Ensure typed text is readable */
+  .hero-section p, #typed-text span {
+    color: #000000 !important;
+  }
+
+  /* Remove Bootstrap's default column padding if it causes issues with full width */
+  .row > * {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+  }
+  .g-4 { /* Reset gutters if they cause overflow */
+      --bs-gutter-x: 0.5rem !important;
+      --bs-gutter-y: 0.5rem !important;
+  }
+
+} /* End of @media print */

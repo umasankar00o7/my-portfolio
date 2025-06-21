@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack-a-Mole! by Uma sankar</title>
+    <style>
+        /* --- Global & Styling --- */
+        :root {
+            --primary-bg: #e8f0f2;       /* Very light blue-gray */
+            --game-bg: #ffffff;
+            --mole-hole-bg: #c5d1d9;   /* Muted blue-gray for holes */
+            --mole-body-color: #5d4037;  /* Dark brown for mole body */
+            --mole-nose-color: #f48fb1; /* Pinkish for nose */
+            --mole-whacked-indicator: #a5d6a7; /* Light green for whacked spot */
+            --text-color: #37474f;     /* Dark slate gray */
+            --accent-color: #0277bd;   /* A professional blue */
+            --accent-hover-color: #01579b; /* Darker blue for hover */
+            --shadow-light: rgba(55, 71, 79, 0.1);
+            --shadow-medium: rgba(55, 71, 79, 0.15);
+            --border-radius-main: 12px;
+            --border-radius-small: 8px;
+        }
+
+        body {
+            font-family: 'Roboto', 'Arial', sans-serif; /* Using a common, clean font */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            padding: 15px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .game-container {
+            background-color: var(--game-bg);
+            padding: clamp(20px, 4vw, 35px);
+            border-radius: var(--border-radius-main);
+            box-shadow: 0 6px 20px var(--shadow-medium);
+            width: 100%;
+            max-width: 420px; /* Good for 3x3 grid and text */
+        }
+
+        h1 {
+            color: var(--accent-color);
+            margin-top: 0;
+            margin-bottom: 5px; /* Reduced for byline */
+            font-size: clamp(1.8em, 5vw, 2.5em);
+            font-weight: 700;
+        }
+
+        /* --- Byline --- */
+        .byline {
+            font-size: clamp(0.8em, 2.5vw, 1em);
+            color: #78909c; /* Lighter text color for byline */
+            margin-bottom: clamp(15px, 3vh, 25px);
+            height: 1.5em; /* Reserve space */
+            font-style: italic;
+        }
+        #bylineText {
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 0.1em solid #78909c;
+            animation: typingByline 2s steps(14, end) forwards, /* "by Uma sankar" is 14 chars */
+                       blinkCaretByline .75s step-end infinite;
+            max-width: 0;
+            display: inline-block; /* For border-right cursor */
+        }
+        @keyframes typingByline {
+            from { max-width: 0; }
+            to { max-width: 100%; }
+        }
+        @keyframes blinkCaretByline {
+            from, to { border-color: transparent; }
+            50% { border-color: #78909c; }
+        }
+
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            font-size: clamp(1em, 3vw, 1.3em);
+            font-weight: 500;
+            margin-bottom: clamp(15px, 3vh, 25px);
+        }
+        .scoreboard span {
+            color: var(--text-color);
+            font-weight: 700;
+        }
+
+        /* --- Game Grid --- */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(8px, 2vw, 12px);
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            margin-bottom: clamp(20px, 4vh, 30px);
+        }
+
+        .mole-hole {
+            background-color: var(--mole-hole-bg);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center; /* For aligning the mole pseudo-element */
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out, transform 0.1s ease;
+            box-shadow: inset 0 1px 3px var(--shadow-light);
+            position: relative; /* For mole pseudo-element positioning */
+            overflow: hidden; /* Keep mole inside */
+        }
+        .mole-hole:hover:not(.mole-up) { /* Don't change bg if mole is up */
+            background-color: #b0bec5; /* Slightly darker hole on hover */
+        }
+        .mole-hole:active {
+            transform: scale(0.96);
+        }
+
+        /* Simple Mole Representation using Pseudo-element */
+        .mole-hole.mole-up::before {
+            content: '';
+            display: block;
+            width: 65%; /* Mole size relative to hole */
+            height: 65%;
+            background-color: var(--mole-body-color);
+            border-radius: 50% 50% 40% 40% / 60% 60% 40% 40%; /* Egg-like shape */
+            position: absolute;
+            bottom: 0; /* Starts at the bottom of the hole */
+            animation: molePopUp 0.3s ease-out forwards;
+            box-shadow: 0 -2px 3px rgba(0,0,0,0.2) inset; /* Inner shadow for depth */
+        }
+        /* Simple nose for the mole */
+        .mole-hole.mole-up::after {
+            content: '';
+            display: block;
+            width: 15%;
+            height: 10%;
+            background-color: var(--mole-nose-color);
+            border-radius: 50%;
+            position: absolute;
+            /* Position nose relative to mole body; adjust as needed */
+            top: 45%; /* Adjust based on how mole ::before is shaped */
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0); /* Start hidden for animation */
+            animation: noseAppear 0.1s 0.2s ease-out forwards; /* Appears after mole pops */
+        }
+
+
+        @keyframes molePopUp {
+            0% { transform: translateY(100%) scale(0.8); opacity: 0.5; } /* Start from bottom, smaller */
+            70% { transform: translateY(-15%) scale(1.05); } /* Overshoot slightly */
+            100% { transform: translateY(0%) scale(1); opacity: 1; } /* Settle in place */
+        }
+        @keyframes noseAppear {
+            from { transform: translate(-50%, -50%) scale(0); }
+            to   { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .mole-hole.mole-whacked {
+            background-color: var(--mole-whacked-indicator); /* Hole briefly changes color */
+            animation: holeWhackedFeedback 0.2s ease-out;
+        }
+        .mole-hole.mole-whacked::before,
+        .mole-hole.mole-whacked::after { /* Hide mole parts when whacked */
+            animation: molePartsDisappear 0.15s ease-out forwards;
+        }
+
+        @keyframes holeWhackedFeedback {
+            0% { opacity: 1; }
+            100% { opacity: 0.7; } /* So it fades back to normal hole color smoothly */
+        }
+        @keyframes molePartsDisappear {
+            to { transform: scale(0.5); opacity: 0; }
+        }
+
+        /* --- Controls & Messages --- */
+        .game-controls button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: clamp(10px, 2vw, 12px) clamp(18px, 4vw, 25px);
+            font-size: clamp(0.9em, 2.8vw, 1.1em);
+            border-radius: var(--border-radius-small);
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            font-weight: 600;
+            box-shadow: 0 2px 5px var(--shadow-light);
+            min-width: 120px; /* Ensure buttons have a decent min width */
+        }
+        .game-controls button:hover {
+            background-color: var(--accent-hover-color);
+        }
+        .game-controls button:active {
+            transform: scale(0.97);
+        }
+        .game-controls button:disabled {
+            background-color: #90a4ae; /* Muted color for disabled */
+            cursor: not-allowed;
+        }
+
+        .message-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(38, 50, 56, 0.9); /* Darker, more focused overlay */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #eceff1; /* Light text on dark overlay */
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .message-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .message-overlay h2 {
+            font-size: clamp(1.6em, 4.5vw, 2.2em);
+            margin-bottom: 10px;
+        }
+        .message-overlay p {
+            font-size: clamp(1.1em, 3.5vw, 1.5em);
+            margin-bottom: 20px;
+        }
+        .message-overlay button { /* Can reuse general button style or be specific */
+            background-color: #4caf50; /* A positive green */
+        }
+        .message-overlay button:hover {
+            background-color: #388e3c;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>Whack-a-Mole!</h1>
+        <div class="byline"><span id="bylineText"></span></div>
+
+        <div class="scoreboard">
+            <div>Score: <span id="scoreDisplay">0</span></div>
+            <div>Time: <span id="timeDisplay">30</span>s</div>
+        </div>
+
+        <div class="game-grid" id="gameGrid">
+            <!-- Mole holes generated by JavaScript -->
+        </div>
+
+        <div class="game-controls">
+            <button id="startButton">Start Game</button>
+        </div>
+    </div>
+
+    <div class="message-overlay" id="messageOverlay">
+        <h2 id="messageTitle">Game Over!</h2>
+        <p id="finalScoreMessage">Your score: 0</p>
+        <button id="playAgainButton">Play Again</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gameGrid = document.getElementById('gameGrid');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const timeDisplay = document.getElementById('timeDisplay');
+            const startButton = document.getElementById('startButton');
+            const messageOverlay = document.getElementById('messageOverlay');
+            const messageTitle = document.getElementById('messageTitle');
+            const finalScoreMessage = document.getElementById('finalScoreMessage');
+            const playAgainButton = document.getElementById('playAgainButton');
+            const bylineTextElement = document.getElementById('bylineText'); // For byline
+
+            const GRID_SIZE = 9;
+            const GAME_DURATION = 30;
+            const MOLE_APPEAR_MIN_TIME = 550;
+            const MOLE_APPEAR_MAX_TIME = 1100;
+            const MOLE_VISIBLE_DURATION = 750;
+
+            let score = 0;
+            let timeLeft = GAME_DURATION;
+            let moleHoles = [];
+            let currentMolePosition = -1;
+            let gameTimerId = null;
+            let moleTimerId = null;
+            let isGameActive = false;
+
+            function typeByline() {
+                const text = "by Uma sankar";
+                bylineTextElement.textContent = ''; // Clear for restart
+                bylineTextElement.style.maxWidth = '0'; // Reset for animation
+                // Trigger reflow to restart animation if needed
+                bylineTextElement.style.animation = 'none';
+                bylineTextElement.offsetHeight; /* trigger reflow */
+                bylineTextElement.style.animation = '';
+
+                bylineTextElement.textContent = text; // Set text before CSS animates width
+                // Animation details are in CSS, just ensure it's re-applied by name
+                bylineTextElement.style.animationName = 'typingByline, blinkCaretByline';
+            }
+
+            function createGrid() {
+                gameGrid.innerHTML = '';
+                moleHoles = [];
+                for (let i = 0; i < GRID_SIZE; i++) {
+                    const hole = document.createElement('div');
+                    hole.classList.add('mole-hole');
+                    hole.dataset.index = i;
+                    hole.addEventListener('mousedown', handleWhack);
+                    gameGrid.appendChild(hole);
+                    moleHoles.push(hole);
+                }
+            }
+
+            function initializeGame() {
+                createGrid();
+                typeByline(); // Initialize byline typing
+                score = 0;
+                timeLeft = GAME_DURATION;
+                updateScoreDisplay();
+                updateTimeDisplay();
+                startButton.disabled = false;
+                startButton.textContent = "Start Game";
+                messageOverlay.classList.remove('show');
+                if (moleTimerId) clearTimeout(moleTimerId);
+                if (gameTimerId) clearInterval(gameTimerId);
+                isGameActive = false;
+                removeMoleVisuals();
+            }
+
+            function startGame() {
+                if (isGameActive) return;
+                isGameActive = true;
+                score = 0;
+                timeLeft = GAME_DURATION;
+                updateScoreDisplay();
+                updateTimeDisplay();
+                startButton.disabled = true;
+                startButton.textContent = "Playing...";
+                typeByline(); // Retype byline on start as well if preferred or just leave it
+
+                showRandomMole();
+                gameTimerId = setInterval(countdown, 1000);
+            }
+
+            function showRandomMole() {
+                if (!isGameActive) return;
+                removeMoleVisuals();
+
+                let randomIndex;
+                do {
+                    randomIndex = Math.floor(Math.random() * GRID_SIZE);
+                } while (randomIndex === currentMolePosition);
+
+                currentMolePosition = randomIndex;
+                moleHoles[currentMolePosition].classList.add('mole-up');
+
+                moleTimerId = setTimeout(() => {
+                    if (isGameActive && moleHoles[currentMolePosition]?.classList.contains('mole-up')) {
+                        removeMoleVisuals();
+                        if (isGameActive) {
+                           setTimeout(showRandomMole, getRandomMoleInterval());
+                        }
+                    }
+                }, MOLE_VISIBLE_DURATION);
+            }
+
+            function removeMoleVisuals() {
+                if (currentMolePosition !== -1 && moleHoles[currentMolePosition]) {
+                    moleHoles[currentMolePosition].classList.remove('mole-up');
+                    moleHoles[currentMolePosition].classList.remove('mole-whacked');
+                }
+                // If there's a mole previously, ensure its whacked state is also cleared from all holes
+                // This is a bit of a blanket clear but ensures no stuck 'mole-whacked' class
+                moleHoles.forEach(hole => hole.classList.remove('mole-whacked'));
+                currentMolePosition = -1;
+            }
+
+            function handleWhack(event) {
+                if (!isGameActive) return;
+
+                const clickedHoleElement = event.currentTarget; // Use currentTarget for the div
+                const clickedHoleIndex = parseInt(clickedHoleElement.dataset.index);
+
+                if (clickedHoleIndex === currentMolePosition && clickedHoleElement.classList.contains('mole-up')) {
+                    score++;
+                    updateScoreDisplay();
+
+                    clickedHoleElement.classList.remove('mole-up');
+                    clickedHoleElement.classList.add('mole-whacked');
+
+                    clearTimeout(moleTimerId);
+
+                    setTimeout(() => {
+                        // removeMoleVisuals will clear whacked from the specific hole later
+                        // but we want the visual feedback to last a bit
+                        if(clickedHoleElement.classList.contains('mole-whacked')){
+                             // After a short delay to show whacked indicator on hole, remove general mole visuals
+                             // but keep whacked on this hole for its animation.
+                             // This logic can be tricky with CSS animations.
+                             // Simpler: rely on next showRandomMole to clean up.
+                        }
+                        if (isGameActive) {
+                            // Slight delay before showing next mole after a successful whack
+                            setTimeout(showRandomMole, 150);
+                        }
+                    }, 100); // Duration for the mole to "disappear" after whack
+                }
+            }
+
+            function countdown() {
+                timeLeft--;
+                updateTimeDisplay();
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }
+
+            function endGame() {
+                isGameActive = false;
+                clearInterval(gameTimerId);
+                clearTimeout(moleTimerId);
+                removeMoleVisuals();
+
+                messageTitle.textContent = "Game Over!";
+                finalScoreMessage.textContent = `Your score: ${score}`;
+                messageOverlay.classList.add('show');
+                startButton.disabled = false;
+                startButton.textContent = "Start Game";
+            }
+
+            function updateScoreDisplay() {
+                scoreDisplay.textContent = score;
+            }
+            function updateTimeDisplay() {
+                timeDisplay.textContent = timeLeft;
+            }
+            function getRandomMoleInterval() {
+                return Math.random() * (MOLE_APPEAR_MAX_TIME - MOLE_APPEAR_MIN_TIME) + MOLE_APPEAR_MIN_TIME;
+            }
+
+            startButton.addEventListener('click', startGame);
+            playAgainButton.addEventListener('click', () => {
+                messageOverlay.classList.remove('show');
+                initializeGame();
+            });
+
+            initializeGame();
+        });
+    </script>
+
+</body>
+</html>

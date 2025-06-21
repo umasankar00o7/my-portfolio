@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Learning Journal - Uma Sankar K</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-bg: #FDFEFF; 
+      --secondary-bg: #F0F4F8; 
+      --card-bg: #FFFFFF;
+      --primary-text: #1A202C; 
+      --secondary-text: #4A5568;
+      
+      --accent-color: #4F46E5; 
+      --accent-color-hover: #4338CA;
+      --accent-color-light: rgba(79, 70, 229, 0.08); 
+      --accent-color-rgb: 79, 70, 229;
+
+      --border-color: #E2E8F0; 
+      --shadow-color-umbra: rgba(26, 32, 44, 0.1); 
+      --shadow-color-penumbra: rgba(26, 32, 44, 0.06);
+      --shadow-color-interactive: rgba(79, 70, 229, 0.15);
+
+      --link-color: var(--accent-color);
+      --link-hover-color: var(--accent-color-hover);
+
+      --button-primary-bg: var(--accent-color);
+      --button-primary-text: #FFFFFF;
+      --button-primary-hover-bg: var(--accent-color-hover);
+      
+      --danger-color: #E53E3E;
+      --danger-color-hover: #C53030;
+
+
+      --input-bg: #FFFFFF;
+      --input-border: #CBD5E0; 
+      --input-text: var(--primary-text);
+      --input-focus-border: var(--accent-color);
+      --input-placeholder-color: #A0AEC0; 
+
+      --font-primary: 'Poppins', sans-serif;
+      --font-secondary: 'Inter', sans-serif;
+
+      --transition-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
+      --transition-duration: 0.3s;
+    }
+
+    ::selection { background-color: var(--accent-color-light); color: var(--accent-color); }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-secondary);
+      background-color: var(--primary-bg);
+      color: var(--primary-text);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding-top: 80px; 
+    }
+    #scroll-progress-bar {
+        position: fixed; top: 0; left: 0; height: 4px;
+        background: var(--accent-color); width: 0%; z-index: 9999;
+        transition: width 0.1s linear;
+    }
+    h1, h2, h3, h4, h5, h6, .section-title-journal {
+      font-family: var(--font-primary); color: var(--primary-text);
+      font-weight: 600; letter-spacing: -0.02em;
+    }
+    a { color: var(--link-color); text-decoration: none; transition: color var(--transition-duration) var(--transition-cubic); }
+    a:hover { color: var(--link-hover-color); }
+    *:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 2px; box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.2); }
+    .btn:focus-visible, .form-control:focus-visible { outline: none; }
+
+    .page-header { padding: 2.5rem 0; background-color: var(--secondary-bg); border-bottom: 1px solid var(--border-color); margin-bottom: 2.5rem; }
+    .section-title-journal { font-weight: 700; font-size: clamp(2rem, 4.5vw, 2.8rem); position: relative; padding-bottom: 1rem; margin-bottom: 0; }
+    .section-title-journal::after { 
+      content: ''; position: absolute; left: 0; bottom: 0; width: 50px; height: 4px; 
+      background: linear-gradient(90deg, var(--accent-color), var(--accent-color-hover)); border-radius: 2px;
+    }
+    #searchInput {
+      background-color: var(--input-bg); color: var(--input-text); border: 1.5px solid var(--input-border);
+      border-radius: 8px; padding: 0.8rem 1.2rem; 
+      transition: border-color var(--transition-duration) var(--transition-cubic), box-shadow var(--transition-duration) var(--transition-cubic);
+      font-size: 1rem; box-shadow: 0 3px 6px var(--shadow-color-penumbra);
+    }
+    #searchInput:focus {
+      border-color: var(--input-focus-border);
+      box-shadow: 0 0 0 3.5px rgba(var(--accent-color-rgb), 0.15), 0 4px 8px var(--shadow-color-interactive); 
+    }
+    #searchInput::placeholder { color: var(--input-placeholder-color); opacity: 1; }
+
+    /* Pro Journal Card Styling */
+    .journal-entry-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px; 
+      box-shadow: 0 5px 15px var(--shadow-color-penumbra);
+      display: flex;
+      flex-direction: column;
+      transition: transform var(--transition-duration) var(--transition-cubic), 
+                  box-shadow var(--transition-duration) var(--transition-cubic),
+                  border-color var(--transition-duration) var(--transition-cubic);
+      position: relative;
+      overflow: hidden; 
+    }
+    .journal-entry-card:hover {
+      transform: translateY(-6px); 
+      box-shadow: 0 10px 25px var(--shadow-color-umbra), 0 4px 10px var(--shadow-color-penumbra); 
+      border-color: rgba(var(--accent-color-rgb), 0.5);
+    }
+    .card-img-container {
+        height: 180px; 
+        overflow: hidden;
+        border-top-left-radius: 11px; 
+        border-top-right-radius: 11px;
+    }
+    .journal-entry-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s var(--transition-cubic);
+    }
+    .journal-entry-card:hover .journal-entry-image {
+        transform: scale(1.05);
+    }
+    .card-img-placeholder { /* For entries without an image */
+        height: 20px; /* Minimal height for a top bar/spacing */
+        background-color: var(--secondary-bg); /* Light subtle bar */
+        border-top-left-radius: 11px;
+        border-top-right-radius: 11px;
+    }
+    .card-img-placeholder::before {
+        content: ""; /* No text */
+    }
+
+    .journal-entry-card .card-body {
+      flex-grow: 1; 
+      display: flex;
+      flex-direction: column;
+      padding: 1.25rem; 
+    }
+    .entry-meta {
+        font-size: 0.8rem;
+        color: var(--secondary-text);
+    }
+    .entry-meta .fas {
+        color: var(--accent-color);
+    }
+    .journal-entry-card .card-title {
+      font-family: var(--font-primary);
+      font-weight: 600;
+      font-size: 1.15rem; 
+      margin-bottom: 0.5rem; 
+      color: var(--primary-text);
+      line-height: 1.3;
+    }
+    .entry-topics {
+        margin-bottom: 0.75rem; 
+    }
+    .topic-badge {
+        background-color: var(--accent-color-light);
+        color: var(--accent-color);
+        font-weight: 500;
+        font-size: 0.7rem;
+        padding: 0.3em 0.7em;
+        border-radius: 12px; 
+        margin-right: 0.3rem;
+        margin-bottom: 0.3rem;
+        display: inline-block;
+    }
+     .topic-badge-empty {
+        background-color: var(--secondary-bg);
+        color: var(--secondary-text);
+        font-style: italic;
+    }
+    .entry-summary {
+        font-size: 0.875rem;
+        color: var(--secondary-text);
+        line-height: 1.5;
+        margin-bottom: 1rem; 
+        flex-grow: 1;
+    }
+    .card-footer-actions {
+        border-top: 1px solid var(--border-color);
+        padding: 0.75rem 1.25rem;
+        background-color: var(--primary-bg); 
+        display: flex;
+        justify-content: space-between; 
+        gap: 0.5rem;
+    }
+    .card-footer-actions .btn {
+        font-size: 0.8rem;
+        font-weight: 500;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease, transform var(--transition-duration) ease;
+    }
+    .card-footer-actions .btn i { margin-right: 0.4rem; }
+    .btn-view-details { color: var(--accent-color); background-color: var(--accent-color-light); border: 1px solid transparent; }
+    .btn-view-details:hover { background-color: var(--accent-color); color: var(--button-primary-text); transform: translateY(-1px); }
+    
+    .btn-edit-entry { color: #DD6B20; background-color: rgba(221, 107, 32, 0.1); border: 1px solid transparent;}
+    .btn-edit-entry:hover { background-color: #DD6B20; color: white; transform: translateY(-1px); }
+
+    .btn-delete-entry { color: var(--danger-color); background-color: rgba(229, 62, 62, 0.1); border: 1px solid transparent; }
+    .btn-delete-entry:hover { background-color: var(--danger-color); color: white; transform: translateY(-1px); }
+
+
+    .btn-primary-action, .btn-danger-action { 
+      font-family: var(--font-secondary); font-weight: 500; font-size: 0.95rem;
+      padding: 0.7rem 1.5rem; border-radius: 8px;
+      transition: background-color var(--transition-duration) var(--transition-cubic), transform var(--transition-duration) var(--transition-cubic), box-shadow var(--transition-duration) var(--transition-cubic);
+    }
+    .btn-primary-action { background-color: var(--accent-color); border-color: transparent; color: var(--button-primary-text); }
+    .btn-primary-action:hover { background-color: var(--accent-color-hover); transform: translateY(-2px); box-shadow: 0 2px 8px var(--shadow-color-interactive); }
+    .btn-danger-action { background-color: var(--danger-color); border-color: transparent; color: var(--button-primary-text); }
+    .btn-danger-action:hover { background-color: var(--danger-color-hover); transform: translateY(-2px); box-shadow: 0 2px 8px rgba(229, 62, 62, 0.2); }
+
+    .btn-outline-secondary-custom {
+        color: var(--secondary-text); border: 1.5px solid var(--border-color);
+        background-color: transparent;
+        padding: 0.7rem 1.5rem; border-radius: 8px; font-size: 0.95rem;
+    }
+    .btn-outline-secondary-custom:hover {
+        background-color: var(--secondary-bg); color: var(--primary-text); border-color: var(--secondary-text);
+    }
+
+
+    .fixed-action-buttons { position: fixed; top: 20px; left: 20px; z-index: 1030; display: flex; gap: 10px; }
+    .fixed-action-buttons .btn { box-shadow: 0 4px 12px var(--shadow-color-penumbra); font-size: 0.9rem; padding: 0.6rem 1.2rem; }
+    .btn-home-action { 
+        background-color: var(--card-bg); color: var(--accent-color); border: 1px solid var(--accent-color);
+    }
+    .btn-home-action:hover { background-color: var(--accent-color-light); }
+    .btn-add-entry-action { background-color: var(--accent-color); color: var(--button-primary-text); border: 1px solid var(--accent-color); }
+    .btn-add-entry-action:hover { background-color: var(--accent-color-hover); }
+
+
+    .modal-content { background-color: var(--card-bg); border-radius: 1rem; color: var(--primary-text); border: 1px solid var(--border-color); box-shadow: 0 10px 30px var(--shadow-color-umbra); }
+    .modal-header { border-bottom: 1px solid var(--border-color); padding: 1.25rem 1.5rem; }
+    .modal-title { font-family: var(--font-primary); font-weight: 600; font-size: 1.4rem; }
+    .modal-body { padding: 1.5rem; }
+    .modal-body p { color: var(--secondary-text); margin-bottom: 1rem; }
+    .modal-body p strong { color: var(--primary-text); font-weight: 600; }
+    
+    #modalCodeView { white-space: pre-wrap; background-color: var(--secondary-bg); border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 1rem; font-family: Consolas, Monaco, 'Courier New', monospace; color: var(--primary-text); max-height: 300px; overflow-y: auto; }
+    #modalResourcesLinkView { color: var(--accent-color); text-decoration: underline; font-weight: 500; word-break: break-all; }
+    #modalResourcesLinkView:hover { color: var(--accent-color-hover); }
+    #modalImageView { max-height: 300px; object-fit: contain; margin-top: 1rem; border-radius: 0.5rem; border: 1px solid var(--border-color); background-color: var(--secondary-bg); }
+    
+    #modalEditContent .form-label { font-weight: 500; font-size: 0.9rem; color: var(--secondary-text); margin-bottom: 0.3rem; }
+    #modalEditContent .form-control {
+        background-color: var(--input-bg); color: var(--input-text); border: 1px solid var(--input-border);
+        border-radius: 6px; padding: 0.6rem 0.9rem; font-size: 0.95rem; margin-bottom: 0.8rem;
+    }
+    #modalEditContent .form-control:focus { border-color: var(--input-focus-border); box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.1); }
+    #modalEditContent textarea.form-control { min-height: 100px; }
+
+    .btn-close { filter: invert(0.3) sepia(0.5) saturate(1) hue-rotate(170deg); }
+    #noEntriesMessage { border: 1px dashed var(--border-color); padding: 2.5rem; border-radius: 8px; background-color: var(--secondary-bg); }
+    #noEntriesMessage p { font-size: 1.1rem; color: var(--secondary-text); margin-bottom: 0; }
+
+    #backToTopBtn {
+      position: fixed; bottom: 25px; right: 25px; z-index: 1029; width: 48px; height: 48px;
+      background-color: var(--accent-color); color: var(--button-primary-text); border: none; border-radius: 50%;
+      transition: background-color var(--transition-duration) var(--transition-cubic), transform var(--transition-duration) var(--transition-cubic), box-shadow var(--transition-duration) var(--transition-cubic), opacity var(--transition-duration) ease, visibility var(--transition-duration) ease;
+      box-shadow: 0 5px 15px rgba(var(--accent-color-rgb),0.2); font-size: 1.7rem; line-height: 1; 
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden; transform: translateY(20px);
+    }
+    #backToTopBtn.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+    #backToTopBtn:hover { background-color: var(--accent-color-hover); transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 20px rgba(var(--accent-color-rgb),0.3); }
+    
+    [data-aos="fade-up"] { transform: translateY(30px); opacity: 0; }
+    
+    @media (max-width: 767px) {
+      body { padding-top: 70px; }
+      .page-header { padding: 2rem 0; margin-bottom: 2rem; }
+      .section-title-journal { font-size: clamp(1.8rem, 5vw, 2.2rem); }
+      .fixed-action-buttons { top: 15px; left: 15px; gap: 8px; }
+      .fixed-action-buttons .btn { padding: 0.5rem 1rem; font-size: 0.85rem; }
+      #searchInput { font-size: 0.95rem; padding: 0.7rem 1rem; }
+      .journal-entry-card .card-body { padding: 1rem; }
+      .journal-entry-card .card-title { font-size: 1.05rem; }
+      .card-footer-actions { padding: 0.6rem 1rem; }
+      .card-footer-actions .btn { font-size: 0.75rem; padding: 0.35rem 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="scroll-progress-bar"></div>
+
+  <div class="fixed-action-buttons">
+    <a href="../index.html" class="btn btn-home-action" aria-label="Go to Home">
+      <i class="fas fa-home me-1"></i> Home
+    </a>
+    <a href="../journal/addentries.html" class="btn btn-add-entry-action" aria-label="Add New Journal Entry">
+      <i class="fas fa-plus me-1"></i> Add Entry
+    </a>
+  </div>
+
+  <header class="page-header">
+    <div class="container">
+        <h1 class="section-title-journal">My Blogs</h1>
+    </div>
+  </header>
+
+  <main class="container pb-5">
+    <div class="row mb-4 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-6">
+        <input
+          type="text"
+          id="searchInput"
+          class="form-control form-control-lg"
+          placeholder="Search blogs by title or topics..."
+          aria-label="Search journal entries"
+        />
+      </div>
+    </div>
+
+    <div id="entries" class="row gy-4 gx-lg-4">
+      <!-- Journal entries will be loaded here by app.js -->
+    </div>
+    
+    <div id="noEntriesMessage" class="text-center mt-5 d-none" data-aos="fade-in">
+        <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+        <p>Your blog is currently empty. Click "Add Entry" to start documenting your blogs!</p>
+    </div>
+  </main>
+
+  <!-- Universal Detail/Edit Modal -->
+  <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="detailModalLabel">Entry Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- View Content -->
+          <div id="modalViewContent">
+            <h4 id="modalTitleView" class="mb-2 fw-bold"></h4>
+            <p class="text-muted mb-3"><small><strong>Date:</strong> <span id="modalDateView"></span></small></p>
+            <p><strong>Topics:</strong> <span id="modalTopicsView"></span></p>
+            <div class="mb-3">
+              <p class="mb-1"><strong>Theory:</strong></p>
+              <pre id="modalCodeView"></pre>
+            </div>
+            <p>
+              <strong>Resource:</strong>
+              <a id="modalResourcesLinkView" href="#" target="_blank" class="d-none">View Resource</a>
+              <span id="modalResourcesTextView" class="text-muted d-none">No external resources provided.</span>
+            </p>
+            <img id="modalImageView" class="img-fluid d-none" alt="Journal image" />
+          </div>
+
+          <!-- Edit Form Content (initially hidden) -->
+          <div id="modalEditContent" class="d-none">
+            <form id="editEntryForm">
+              <div class="mb-3">
+                <label for="modalEditTitle" class="form-label">Title</label>
+                <input type="text" class="form-control" id="modalEditTitle" required>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="modalEditDate" class="form-label">Date</label>
+                  <input type="date" class="form-control" id="modalEditDate" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="modalEditTopics" class="form-label">Topics (comma-separated)</label>
+                  <input type="text" class="form-control" id="modalEditTopics">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="modalEditCode" class="form-label">Theory</label>
+                <textarea class="form-control" id="modalEditCode" rows="6"></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="modalEditResources" class="form-label">Resources URL</label>
+                <input type="url" class="form-control" id="modalEditResources" placeholder="https://example.com">
+              </div>
+              <div class="mb-3">
+                <label for="modalEditImage" class="form-label">Image URL</label>
+                <input type="url" class="form-control" id="modalEditImage" placeholder="https://example.com/image.jpg">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary-custom" data-bs-dismiss="modal" id="closeViewButton">Close</button>
+            <button type="submit" form="editEntryForm" class="btn btn-primary-action d-none" id="saveChangesButton">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Delete Modal -->
+  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete the entry titled: <br><strong id="entryNameToDelete" class="text-break"></strong>?</p>
+          <p class="text-danger small"><i class="fas fa-exclamation-triangle me-1"></i>This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary-custom" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger-action" id="confirmDeleteButton">Yes, Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button id="backToTopBtn" title="Go to top">
+    <i class="bi bi-arrow-up-short"></i>
+  </button>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+  <script src="js/app.js"></script> <!-- Make sure this path is correct -->
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      AOS.init({
+        duration: 500, 
+        once: true, 
+        offset: 40, 
+        easing: 'ease-out-quad', 
+      });
+
+      const scrollProgressBar = document.getElementById('scroll-progress-bar');
+      if (scrollProgressBar) {
+        window.addEventListener('scroll', () => {
+          const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+          const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+          const scrollPercentage = (scrollTop / scrollHeight) * 100;
+          scrollProgressBar.style.width = scrollPercentage + '%';
+        });
+      }
+
+      const backToTopButton = document.getElementById("backToTopBtn");
+      if (backToTopButton) {
+        window.addEventListener('scroll', () => {
+          if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+            backToTopButton.classList.add('visible');
+          } else {
+            backToTopButton.classList.remove('visible');
+          }
+        });
+        backToTopButton.addEventListener("click", () => window.scrollTo({top: 0, behavior: 'smooth'}) );
+      }
+    });
+  </script>
+</body>
+</html>

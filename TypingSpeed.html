@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Speed Test | by Uma sankar</title>
+    <style>
+        :root {
+            --bg-main: #eef1f5; /* Lighter, cooler background */
+            --bg-container: #ffffff;
+            --text-primary: #2c3e50; /* Midnight Blue - strong primary text */
+            --text-secondary: #566573; /* Slate Gray - good for less emphasis */
+            --accent-primary: #2979FF;  /* A vibrant, modern blue */
+            --accent-primary-hover: #1C5CFF;
+            --accent-secondary: #1DE9B6; /* Teal/Turquoise - for highlights/stats */
+            --correct-color: #00C853; /* A clear, positive green */
+            --incorrect-color: #D50000; /* A strong, clear red */
+            --current-char-bg: #BBDEFB; /* Light blue highlight for current char */
+            --border-color: #CFD8DC; /* Softer border */
+            --shadow-color: rgba(41, 121, 255, 0.12); /* Shadow tied to accent */
+            --border-radius: 10px; /* Slightly rounder */
+            --border-radius-small: 6px;
+            --font-main: 'Roboto', 'Helvetica Neue', Arial, sans-serif; /* Modern sans-serif */
+        }
+
+        body {
+            font-family: var(--font-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            padding: 15px;
+            box-sizing: border-box;
+            line-height: 1.65; /* Increased for better readability */
+        }
+
+        .game-container {
+            background-color: var(--bg-container);
+            padding: clamp(25px, 5vw, 40px);
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 30px var(--shadow-color);
+            width: 100%;
+            max-width: 720px;
+            text-align: center; /* This centers inline/inline-block children like h1, byline, button */
+        }
+
+        h1 {
+            color: var(--accent-primary);
+            margin-top: 0;
+            margin-bottom: 5px; /* Space for byline */
+            font-size: clamp(2em, 5.5vw, 2.8em);
+            font-weight: 700;
+            letter-spacing: -0.5px; /* Slight tightening for modern feel */
+        }
+
+        /* --- Byline --- */
+        .byline {
+            font-size: clamp(0.85em, 2.8vw, 1.1em);
+            color: var(--text-secondary);
+            margin-bottom: clamp(20px, 4vh, 35px);
+            height: 1.8em; /* Adjusted for symbol + text */
+            font-style: italic;
+        }
+        .byline-symbol {
+            color: var(--accent-secondary);
+            font-size: 1.1em; /* Slightly larger symbol */
+            margin-right: 0.3em;
+            opacity: 0; /* Start invisible, fade in with animation */
+            /* animation is set by JS for restartability */
+        }
+        @keyframes fadeInSymbol {
+            to { opacity: 1; }
+        }
+        #bylineText {
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 0.12em solid var(--text-secondary); /* Slightly thicker caret */
+            /* animation is set by JS for restartability */
+            max-width: 0; /* Start collapsed, typing animation expands it */
+            display: inline-block;
+            vertical-align: middle; /* Align text with symbol */
+        }
+        @keyframes typingByline {
+            from { max-width: 0; }
+            to { max-width: 100%; }
+        }
+        @keyframes blinkCaretByline {
+            from, to { border-color: transparent; }
+            50% { border-color: var(--text-secondary); }
+        }
+
+        .sample-text-area {
+            font-size: clamp(1.15em, 3.2vw, 1.5em); /* Slightly larger sample text */
+            color: var(--text-primary); /* Darker for better focus */
+            margin-bottom: clamp(20px, 4vh, 30px);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-small);
+            background-color: #fcfdff; /* Very light, almost white */
+            min-height: 110px;
+            text-align: left; /* Explicitly left-align sample text */
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.7; /* More spacing for sample text */
+        }
+        .sample-text-area span {
+            transition: color 0.08s ease-out, background-color 0.08s ease-out;
+        }
+        .sample-text-area .correct {
+            color: var(--correct-color);
+            font-weight: 500; /* Slight emphasis */
+        }
+        .sample-text-area .incorrect {
+            color: var(--incorrect-color);
+            background-color: #ffebee; /* Lighter red background */
+            text-decoration: underline wavy var(--incorrect-color); /* Wavy underline */
+            text-decoration-skip-ink: none; /* Ensure underline is consistent */
+        }
+        .sample-text-area .current {
+            background-color: var(--current-char-bg);
+            color: var(--accent-primary); /* Current char text also in accent */
+            padding: 0.05em 0.1em; /* More defined highlight */
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+
+        .typing-input {
+            width: 100%; /* Let padding define inner width, box-sizing handles it */
+            padding: 18px 20px; /* More comfortable padding */
+            font-size: clamp(1.05em, 3.1vw, 1.35em);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-small);
+            margin-bottom: clamp(20px, 4vh, 30px);
+            box-sizing: border-box; /* Crucial for width + padding */
+            font-family: var(--font-main);
+            color: var(--text-primary);
+            text-align: left; /* Ensures placeholder and typed text align left */
+            resize: vertical; /* Allow vertical resize, disable horizontal */
+        }
+        .typing-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(41, 121, 255, 0.25); /* More pronounced focus */
+        }
+
+        .stats-area {
+            display: grid; /* Use grid for better alignment on small screens */
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin-bottom: clamp(25px, 4.5vh, 35px);
+            font-size: clamp(1em, 3vw, 1.25em);
+        }
+        .stats-area div {
+            padding: 12px 15px;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius-small);
+            border-left: 4px solid var(--accent-secondary); /* Accent border */
+            text-align: left;
+        }
+        .stats-area .label {
+            display: block;
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-bottom: 0.2em;
+        }
+        .stats-area .value {
+            font-weight: 700;
+            font-size: 1.1em;
+            color: var(--text-primary);
+        }
+
+        .controls button {
+            background: linear-gradient(45deg, var(--accent-primary), #1E88E5); /* Gradient button */
+            color: white;
+            border: none;
+            padding: clamp(14px, 2.8vw, 18px) clamp(30px, 6vw, 40px);
+            font-size: clamp(1.05em, 3.2vw, 1.25em);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.25s ease-out;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(41, 121, 255, 0.2);
+            letter-spacing: 0.5px;
+        }
+        .controls button:hover {
+            background: linear-gradient(45deg, var(--accent-primary-hover), var(--accent-primary));
+            box-shadow: 0 6px 15px rgba(41, 121, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        .controls button:active {
+            transform: translateY(0px) scale(0.98);
+            box-shadow: 0 2px 8px rgba(41, 121, 255, 0.2);
+        }
+        .controls button:disabled {
+            background: #B0BEC5; /* Muted disabled color */
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>Typing Speed Test</h1>
+        <div class="byline">
+            <span class="byline-symbol">- Designed</span><span id="bylineText"></span>
+        </div>
+
+        <div class="sample-text-area" id="sampleTextDisplay">
+            Click "Start Test" to begin.
+        </div>
+
+        <textarea class="typing-input" id="typingInput" rows="4" placeholder="Start typing here when ready..." disabled></textarea>
+
+        <div class="stats-area">
+            <div><span class="label">Time:</span> <span class="value" id="timeDisplay">0s</span></div>
+            <div><span class="label">WPM:</span> <span class="value" id="wpmDisplay">0</span></div>
+            <div><span class="label">Accuracy:</span> <span class="value" id="accuracyDisplay">0%</span></div>
+        </div>
+
+        <div class="controls">
+            <button id="startButton">Start Test</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sampleTextDisplay = document.getElementById('sampleTextDisplay');
+            const typingInput = document.getElementById('typingInput');
+            const timeDisplay = document.getElementById('timeDisplay');
+            const wpmDisplay = document.getElementById('wpmDisplay');
+            const accuracyDisplay = document.getElementById('accuracyDisplay');
+            const startButton = document.getElementById('startButton');
+            const bylineTextElement = document.getElementById('bylineText');
+            const bylineSymbolElement = document.querySelector('.byline-symbol');
+
+            const sampleTexts = [
+                "The quick brown fox jumps over the lazy dog. This sentence contains all the letters of the alphabet, making it ideal for practice.",
+                "Programming is the art of telling another human being what one wants the computer to do. Strive for clarity and simplicity in your code.",
+                "Consistent practice is the key to mastery. The more you immerse yourself in typing, the faster and more accurate your skills will become.",
+                "Never underestimate the profound power of a well-brewed cup of coffee and a focused mind when tackling complex challenges and coding problems.",
+                "Innovation, creativity, and a relentless pursuit of knowledge distinguish a leader from a follower. Always keep learning and exploring new technologies.",
+                "The epic journey of a thousand miles invariably begins with a single, courageous step. Start small, dream big, work hard, and stay dedicated.",
+                "Simplicity, elegance, and readability are the hallmarks of ultimate sophistication in software design. Aim for clean and maintainable code."
+            ];
+
+            let currentText = "";
+            let originalTextChars = [];
+            let timerInterval = null;
+            let timeElapsed = 0;
+            let gameStarted = false;
+            let errors = 0;
+            let charactersTyped = 0;
+
+            function typeByline() {
+                const text = "by Uma sankar";
+                if (!bylineTextElement || !bylineSymbolElement) {
+                    console.error("Byline elements not found!");
+                    return;
+                }
+
+                bylineTextElement.textContent = '';
+                bylineTextElement.style.maxWidth = '0';
+                bylineSymbolElement.style.opacity = '0';
+
+                bylineTextElement.style.animation = 'none';
+                bylineSymbolElement.style.animation = 'none';
+                void bylineTextElement.offsetHeight;
+                void bylineSymbolElement.offsetHeight;
+
+                bylineTextElement.textContent = text;
+                // Apply animations by falling back to CSS definitions
+                // CSS has: animation: typingByline 2s steps(14, end) 0.5s forwards, blinkCaretByline .75s step-end 0.5s infinite;
+                // CSS has: animation: fadeInSymbol 0.5s 0.2s ease-out forwards;
+                bylineTextElement.style.animation = `typingByline 2s steps(${text.length}, end) 0.5s forwards, blinkCaretByline .75s step-end 0.5s infinite`;
+                bylineSymbolElement.style.animation = `fadeInSymbol 0.5s 0.2s ease-out forwards`;
+            }
+
+
+            function loadNewText() {
+                clearInterval(timerInterval);
+                timeElapsed = 0;
+                gameStarted = false;
+                errors = 0;
+                charactersTyped = 0;
+                typeByline();
+                updateStatsDisplay();
+
+
+                const randomIndex = Math.floor(Math.random() * sampleTexts.length);
+                currentText = sampleTexts[randomIndex];
+                sampleTextDisplay.innerHTML = '';
+                originalTextChars = [];
+
+                currentText.split('').forEach(char => {
+                    const charSpan = document.createElement('span');
+                    charSpan.textContent = char;
+                    sampleTextDisplay.appendChild(charSpan);
+                    originalTextChars.push(charSpan);
+                });
+
+                typingInput.value = '';
+                typingInput.disabled = false;
+                typingInput.focus();
+                startButton.textContent = "Reset";
+                if (originalTextChars.length > 0) {
+                    originalTextChars[0].classList.add('current');
+                }
+            }
+
+            function startTimer() {
+                if (gameStarted) return;
+                gameStarted = true;
+                timeElapsed = 0;
+                updateTimerDisplay();
+                timerInterval = setInterval(() => {
+                    timeElapsed++;
+                    updateTimerDisplay();
+                    if (gameStarted) {
+                        updateStatsDisplay();
+                    }
+                }, 1000);
+            }
+
+            function stopTimer() {
+                clearInterval(timerInterval);
+                gameStarted = false;
+            }
+
+            function updateTimerDisplay() {
+                timeDisplay.textContent = timeElapsed + 's';
+            }
+
+            function calculateWPM() {
+                if (timeElapsed === 0 || charactersTyped === 0) return 0;
+                const minutes = timeElapsed / 60;
+                const grossWords = charactersTyped / 5;
+                const grossWPM = Math.round(grossWords / minutes);
+                const errorWords = errors / 5;
+                const netWords = Math.max(0, grossWords - errorWords);
+                const netWPM = Math.round(netWords / minutes);
+                return Math.max(0, netWPM);
+            }
+
+            function calculateAccuracy() {
+                if (charactersTyped === 0) return 100;
+                const correctChars = charactersTyped - errors;
+                const accuracy = Math.round((correctChars / charactersTyped) * 100);
+                return Math.max(0, accuracy);
+            }
+
+            function updateStatsDisplay() {
+                timeDisplay.textContent = timeElapsed + 's';
+                wpmDisplay.textContent = calculateWPM();
+                accuracyDisplay.textContent = calculateAccuracy() + '%';
+            }
+
+            typingInput.addEventListener('input', () => {
+                if (!gameStarted && typingInput.value.length > 0) {
+                    startTimer();
+                }
+                if (!gameStarted && typingInput.value.length === 0 && timerInterval) {
+                    stopTimer();
+                    timeElapsed = 0;
+                    updateTimerDisplay();
+                }
+
+
+                const typedText = typingInput.value;
+                let currentErrors = 0;
+                charactersTyped = typedText.length;
+
+                originalTextChars.forEach((charSpan, index) => {
+                    const typedChar = typedText[index];
+                    charSpan.classList.remove('correct', 'incorrect', 'current');
+
+                    if (index < typedText.length) {
+                        if (typedChar === charSpan.textContent) {
+                            charSpan.classList.add('correct');
+                        } else {
+                            charSpan.classList.add('incorrect');
+                            currentErrors++;
+                        }
+                    } else if (index === typedText.length && index < currentText.length) {
+                        charSpan.classList.add('current');
+                    }
+                });
+                errors = currentErrors;
+
+                if(gameStarted) {
+                    updateStatsDisplay();
+                }
+
+
+                if (typedText.length === currentText.length) {
+                    stopTimer();
+                    updateStatsDisplay();
+                    typingInput.disabled = true;
+                    startButton.textContent = "New Text";
+                    if(errors === 0 && currentText.length > 0){ // Check currentText length to avoid alert on empty
+                        alert("Flawless Typing! 🎉 You're a Speed Demon!");
+                    }
+                }
+            });
+
+            startButton.addEventListener('click', loadNewText);
+
+            sampleTextDisplay.textContent = "Click 'Start Test' to begin.";
+            updateStatsDisplay();
+            typeByline();
+
+        });
+    </script>
+
+</body>
+</html>

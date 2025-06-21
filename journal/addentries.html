@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Add Learning Journal Entry - Uma Sankar K</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- No AOS needed for a simple form page unless you want to animate the form card itself -->
+
+  <style>
+    :root {
+      --primary-bg: #FDFEFF; 
+      --secondary-bg: #F0F4F8; 
+      --card-bg: #FFFFFF;
+      --primary-text: #1A202C; 
+      --secondary-text: #4A5568;
+      
+      --accent-color: #4F46E5; 
+      --accent-color-hover: #4338CA;
+      --accent-color-light: rgba(79, 70, 229, 0.08); 
+      --accent-color-rgb: 79, 70, 229;
+
+      --border-color: #E2E8F0; 
+      --shadow-color-umbra: rgba(26, 32, 44, 0.1); 
+      --shadow-color-penumbra: rgba(26, 32, 44, 0.06);
+      --shadow-color-interactive: rgba(79, 70, 229, 0.15);
+
+      --link-color: var(--accent-color);
+      --link-hover-color: var(--accent-color-hover);
+
+      --button-primary-bg: var(--accent-color);
+      --button-primary-text: #FFFFFF;
+      --button-primary-hover-bg: var(--accent-color-hover);
+      
+      --input-bg: #FFFFFF;
+      --input-border: #CBD5E0; 
+      --input-text: var(--primary-text);
+      --input-focus-border: var(--accent-color);
+      --input-placeholder-color: #A0AEC0; 
+
+      --font-primary: 'Poppins', sans-serif;
+      --font-secondary: 'Inter', sans-serif;
+
+      --transition-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
+      --transition-duration: 0.3s;
+    }
+
+    ::selection { background-color: var(--accent-color-light); color: var(--accent-color); }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-secondary);
+      background-color: var(--primary-bg);
+      color: var(--primary-text);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding-top: 80px; 
+      padding-bottom: 4rem; /* Space at the bottom */
+    }
+    
+    #scroll-progress-bar {
+        position: fixed; top: 0; left: 0; height: 4px;
+        background: var(--accent-color); width: 0%; z-index: 9999;
+        transition: width 0.1s linear;
+    }
+
+    h1, h2, h3, h4, h5, h6, .section-title-form {
+      font-family: var(--font-primary); color: var(--primary-text);
+      font-weight: 600; letter-spacing: -0.02em;
+    }
+    
+    *:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 2px; box-shadow: 0 0 0 4px rgba(var(--accent-color-rgb), 0.2); }
+    .btn:focus-visible, .form-control:focus-visible { outline: none; }
+
+    .page-header { padding: 2.5rem 0; background-color: var(--secondary-bg); border-bottom: 1px solid var(--border-color); margin-bottom: 2.5rem; }
+    .section-title-form { font-weight: 700; font-size: clamp(2rem, 4.5vw, 2.8rem); position: relative; padding-bottom: 1rem; margin-bottom: 0; }
+    .section-title-form::after { 
+      content: ''; position: absolute; left: 0; bottom: 0; width: 50px; height: 4px; 
+      background: linear-gradient(90deg, var(--accent-color), var(--accent-color-hover)); border-radius: 2px;
+    }
+
+    .form-container {
+        background-color: var(--card-bg);
+        padding: 2rem 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px var(--shadow-color-umbra), 0 5px 15px var(--shadow-color-penumbra);
+        border: 1px solid var(--border-color);
+    }
+    @media (max-width: 767px) {
+        .form-container {
+            padding: 1.5rem;
+        }
+    }
+
+    .form-label {
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: var(--secondary-text);
+        margin-bottom: 0.4rem;
+    }
+
+    .form-control {
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border: 1.5px solid var(--input-border);
+        border-radius: 8px;
+        padding: 0.75rem 1.1rem;
+        transition: border-color var(--transition-duration) var(--transition-cubic), box-shadow var(--transition-duration) var(--transition-cubic);
+        font-size: 0.95rem;
+    }
+    .form-control:focus {
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border-color: var(--input-focus-border);
+        box-shadow: 0 0 0 3.5px rgba(var(--accent-color-rgb), 0.15);
+    }
+    .form-control::placeholder {
+        color: var(--input-placeholder-color);
+        opacity: 1;
+    }
+    textarea.form-control {
+        min-height: 100px;
+    }
+
+    .btn-primary-action {
+      font-family: var(--font-secondary); font-weight: 500; font-size: 1rem;
+      padding: 0.75rem 1.8rem; border-radius: 8px;
+      background-color: var(--accent-color); border-color: transparent; color: var(--button-primary-text);
+      transition: background-color var(--transition-duration) var(--transition-cubic), transform var(--transition-duration) var(--transition-cubic), box-shadow var(--transition-duration) var(--transition-cubic);
+    }
+    .btn-primary-action:hover:not(:disabled) {
+      background-color: var(--accent-color-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 3px 10px var(--shadow-color-interactive);
+    }
+    .btn-primary-action:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .btn-outline-secondary-custom {
+        font-family: var(--font-secondary); font-weight: 500; font-size: 1rem;
+        padding: 0.75rem 1.8rem; border-radius: 8px;
+        color: var(--secondary-text); border: 1.5px solid var(--border-color);
+        background-color: transparent;
+        transition: background-color var(--transition-duration) var(--transition-cubic), color var(--transition-duration) var(--transition-cubic), border-color var(--transition-duration) var(--transition-cubic);
+    }
+    .btn-outline-secondary-custom:hover {
+        background-color: var(--secondary-bg);
+        color: var(--primary-text);
+        border-color: var(--secondary-text);
+    }
+    
+    /* Action Buttons (Home, View Entries) */
+    .fixed-action-buttons { position: fixed; top: 20px; left: 20px; z-index: 1030; display: flex; gap: 10px; }
+    .fixed-action-buttons .btn { box-shadow: 0 4px 12px var(--shadow-color-penumbra); font-size: 0.9rem; padding: 0.6rem 1.2rem; }
+    .btn-home-action { 
+        background-color: var(--card-bg); color: var(--accent-color); border: 1px solid var(--accent-color);
+    }
+    .btn-home-action:hover { background-color: var(--accent-color-light); }
+    .btn-view-entries-action { 
+      background-color: var(--accent-color); color: var(--button-primary-text); border: 1px solid var(--accent-color); 
+    }
+    .btn-view-entries-action:hover { background-color: var(--accent-color-hover); }
+    
+    .form-actions-footer {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: flex-end; /* Align buttons to the right */
+        gap: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="scroll-progress-bar"></div>
+
+  <div class="fixed-action-buttons">
+    <a href="../index.html" class="btn btn-home-action" aria-label="Go to Main Portfolio">
+      <i class="fas fa-home me-1"></i> Portfolio
+    </a>
+    <a href="journal.html" class="btn btn-view-entries-action" aria-label="View All Journal Entries">
+      <i class="fas fa-book-open me-1"></i> View Entries
+    </a>
+  </div>
+
+  <header class="page-header">
+    <div class="container">
+        <h1 class="section-title-form">Add a New Blog..</h1>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-md-10">
+        <div class="form-container">
+          <form id="journalForm">
+            <div class="mb-3">
+              <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
+              <input type="text" id="title" class="form-control" placeholder="Enter weeks" required />
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="date" class="form-label">Date <span class="text-danger">*</span></label>
+                    <input type="date" id="date" class="form-control" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="image" class="form-label">Image URL</label>
+                    <input type="url" id="image" class="form-control" placeholder="https://example.com/image.jpg" />
+                </div>
+            </div>
+            <div class="mb-3">
+              <label for="topics" class="form-label">Topics (comma-separated) <span class="text-danger">*</span></label>
+              <textarea id="topics" class="form-control" rows="2" placeholder="e.g., Firebase, JavaScript, Security" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="code" class="form-label">Code Snippet / Notes</label>
+              <textarea id="code" class="form-control" rows="5" placeholder="Paste your code or write detailed notes here..."></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="resources" class="form-label">Resources / Links</label>
+              <input type="url" id="resources" class="form-control" placeholder="https://relevant-documentation.com" />
+            </div>
+            
+            <div class="form-actions-footer">
+              <button type="submit" id="saveEntryButton" class="btn btn-primary-action">
+                <i class="fas fa-save me-2"></i>Save Entry
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="js/app.js"></script> <!-- Ensure this path is correct -->
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Scroll Progress Bar
+      const scrollProgressBar = document.getElementById('scroll-progress-bar');
+      if (scrollProgressBar) {
+        window.addEventListener('scroll', () => {
+          const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+          const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+          const scrollPercentage = (scrollTop / scrollHeight) * 100;
+          scrollProgressBar.style.width = scrollPercentage + '%';
+        });
+      }
+
+      // Form submission loading state
+      const journalForm = document.getElementById('journalForm');
+      const saveEntryButton = document.getElementById('saveEntryButton');
+
+      if (journalForm && saveEntryButton) {
+        journalForm.addEventListener('submit', function() {
+          // Basic client-side validation check
+          if (journalForm.checkValidity()) {
+            saveEntryButton.disabled = true;
+            saveEntryButton.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...`;
+            
+            // Re-enable the button after a short delay to allow Firebase to process
+            // Note: app.js handles the actual success/error and form reset.
+            // This is just for immediate UI feedback.
+            // A more robust solution would involve callbacks or promises from app.js
+            // to precisely control button state.
+            setTimeout(() => {
+                // Check if the form was reset (indicative of successful save by app.js)
+                const titleInput = document.getElementById('title');
+                if (titleInput && titleInput.value === '') {
+                    // Form was likely reset by app.js after successful save
+                } else {
+                    // Save might have failed or app.js didn't reset, re-enable
+                    // or rely on app.js's alert.
+                }
+                saveEntryButton.disabled = false;
+                saveEntryButton.innerHTML = `<i class="fas fa-save me-2"></i>Save Entry`;
+            }, 2500); // Adjust timeout as needed
+          }
+        });
+      }
+
+      // Set default date to today
+      const dateInput = document.getElementById('date');
+      if (dateInput && !dateInput.value) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+        const dd = String(today.getDate()).padStart(2, '0');
+        dateInput.value = `${yyyy}-${mm}-${dd}`;
+      }
+    });
+  </script>
+</body>
+</html>

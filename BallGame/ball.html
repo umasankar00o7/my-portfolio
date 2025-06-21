@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keep The Ball Up!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-wrapper">
+        <header class="game-header">
+            <h1>Keep The Ball Up!</h1>
+            <!-- MOVED & UPDATED BYLINE CONTAINER HERE -->
+            <div class="byline-heading-container" id="bylineHeadingContainer">
+                <span id="bylinePrefix"></span><span id="bylineName"></span>
+            </div>
+            <div class="score-board">
+                Score: <span id="scoreValue">0</span> | High Score: <span id="highScoreValue">0</span>
+            </div>
+        </header>
+
+        <main class="game-arena" id="gameArena">
+            <div class="ball" id="ball"></div>
+            <div class="paddle" id="paddle"></div>
+            <div class="message-overlay" id="messageOverlay">
+                <p id="messageText">Move mouse or touch to control paddle. Click to Start!</p>
+                <button id="startButton">Start Game</button>
+            </div>
+        </main>
+
+        <footer class="game-footer">
+            <p>Game On!</p> <!-- Or remove/change as desired -->
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

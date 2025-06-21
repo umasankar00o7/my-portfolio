@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe - AI Edition</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Arial', 'Helvetica Neue', sans-serif;
+            display: flex;
+            flex-direction: column; /* To stack game and byline */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5; /* Light grayish blue */
+            color: #333;
+            padding: 15px; /* Add padding for smaller screens */
+            box-sizing: border-box;
+        }
+
+        /* Game Container */
+        .game-container {
+            background-color: #ffffff;
+            padding: clamp(20px, 5vw, 40px); /* Responsive padding */
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0,0,0,0.06);
+            text-align: center;
+            width: 100%;
+            max-width: 450px; /* Max width for larger screens */
+        }
+
+        /* Page Title */
+        h1 {
+            color: #2c3e50; /* Dark blue-gray */
+            margin-top: 0;
+            margin-bottom: clamp(15px, 3vw, 20px); /* Adjusted for byline */
+            font-size: clamp(2em, 6vw, 2.8em); /* Responsive font size */
+        }
+
+        /* Byline Container - MOVED & UPDATED */
+        .byline-container {
+            margin-top: clamp(0px, 1vw, 5px); /* Space from H1 */
+            margin-bottom: clamp(20px, 4vw, 30px); /* Space before the board */
+            text-align: center;
+            width: 100%;
+            max-width: 450px; /* Match game container width if needed, or remove if always centered */
+        }
+
+        /* Byline Auto-type Text - UPDATED */
+        #bylineText {
+            font-size: clamp(0.9em, 2.5vw, 1.1em); /* Adjusted font size */
+            color: #576a7f; /* Cool gray */
+            font-style: italic;
+            height: 1.5em; /* Reserve space for text to avoid layout shift */
+            white-space: nowrap; /* Keep it on one line during typing */
+            overflow: hidden; /* Hide text until typed */
+            display: inline-block; /* To allow cursor to be next to text */
+            border-right: 0.15em solid #576a7f; /* Blinking cursor */
+            /* Updated for "Engineered for AI by Uma Sankar." (32 chars) */
+            animation: typing 3s steps(32, end) forwards,
+                       blink-caret .75s step-end infinite;
+            max-width: 0; /* Start with no width */
+        }
+
+
+        /* Game Board */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, clamp(70px, 22vw, 110px));
+            grid-template-rows: repeat(3, clamp(70px, 22vw, 110px));
+            gap: clamp(5px, 1.5vw, 10px); /* Responsive gap */
+            margin-bottom: clamp(20px, 4vw, 30px);
+            justify-content: center; /* Center grid if it's smaller than container */
+        }
+
+        /* Board Cells */
+        .cell {
+            background-color: #e8ecf1; /* Light steel blue */
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(2.5em, 10vw, 4em); /* Responsive X/O size */
+            font-weight: bold;
+            cursor: pointer;
+            color: #34495e; /* Wet asphalt */
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+        }
+
+        .cell:hover:not(:disabled) {
+            background-color: #dde4ea;
+        }
+        .cell:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .cell.x {
+            color: #3498db;
+        }
+
+        .cell.o {
+            color: #e74c3c;
+        }
+
+        .cell.winning {
+            background-color: #a2d2ff;
+            color: #003566;
+        }
+        
+        .cell:disabled {
+            cursor: not-allowed;
+        }
+
+
+        /* Game Status Messages */
+        .status-message {
+            font-size: clamp(1.1em, 3.5vw, 1.5em);
+            color: #7f8c8d; /* Asbestos gray */
+            margin-bottom: clamp(15px, 3vw, 25px);
+            min-height: 1.5em; /* Reserve space */
+            font-weight: 500;
+        }
+
+        /* Restart Button */
+        .restart-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: clamp(10px, 2.5vw, 15px) clamp(20px, 5vw, 30px);
+            font-size: clamp(0.9em, 3vw, 1.2em);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+            font-weight: bold;
+        }
+
+        .restart-button:hover {
+            background-color: #2980b9;
+        }
+        .restart-button:active {
+            transform: scale(0.98);
+        }
+
+        /* Typing animation */
+        @keyframes typing {
+            from { max-width: 0; }
+            to { max-width: 100%; }
+        }
+
+        /* Blinking cursor animation */
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: #576a7f; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>Tic Tac Toe</h1>
+        <!-- Byline MOVED HERE -->
+        <div class="byline-container">
+            <span id="bylineTextContainer"><span id="bylineText"></span></span>
+        </div>
+        <div class="board" id="gameBoard">
+            <!-- Cells will be generated by JavaScript -->
+        </div>
+        <div class="status-message" id="statusDisplay">Player X's turn</div>
+        <button class="restart-button" id="restartGameButton">Restart Game</button>
+    </div>
+
+    <!-- Byline container REMOVED from here -->
+
+    <script>
+        // HTML Element References
+        const gameBoardElement = document.getElementById('gameBoard');
+        const statusDisplayElement = document.getElementById('statusDisplay');
+        const restartGameButtonElement = document.getElementById('restartGameButton');
+        const bylineTextElement = document.getElementById('bylineText');
+
+        // Game State Variables
+        let currentPlayer; // 'X' or 'O'
+        let playerSymbol = 'X'; // Human player is always X
+        let computerSymbol = 'O'; // Computer player is always O
+        let gameBoardState; // Array representing the 9 cells
+        let isGameActive; // Boolean: true if game is ongoing
+
+        // Winning combinations (indexes of the gameBoardState array)
+        const winningCombinations = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6]             // Diagonals
+        ];
+
+        // --- Typing Animation for Byline ---
+        function typeByline() {
+            // UPDATED TEXT
+            const textToType = " - By Uma Sankar.";
+            let index = 0;
+            bylineTextElement.textContent = ''; // Clear previous text
+            bylineTextElement.style.maxWidth = '0'; // Reset for animation start
+            
+            // CSS animation handles the typing effect, but we set the text here
+            bylineTextElement.textContent = textToType;
+            // Trigger reflow to restart animation if game is restarted
+            bylineTextElement.style.animation = 'none';
+            bylineTextElement.offsetHeight; /* trigger reflow */
+            bylineTextElement.style.animation = ''; 
+            // The animation details (steps, duration) are now fully defined in CSS
+            // but we ensure the 'typing' and 'blink-caret' animations are re-applied by name.
+            bylineTextElement.style.animationName = 'typing, blink-caret';
+        }
+        
+        // --- Game Initialization ---
+        function initializeBoard() {
+            gameBoardState = ['', '', '', '', '', '', '', '', ''];
+            isGameActive = true;
+            currentPlayer = playerSymbol; // Player X starts
+            
+            statusDisplayElement.textContent = `Player ${currentPlayer}'s turn`;
+            gameBoardElement.innerHTML = ''; // Clear previous board cells
+
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('button');
+                cell.classList.add('cell');
+                cell.dataset.index = i;
+                cell.textContent = '';
+                cell.disabled = false; // Enable button
+                cell.addEventListener('click', handleCellClick);
+                gameBoardElement.appendChild(cell);
+            }
+            typeByline(); // Start typing animation
+        }
+
+        // --- Handle Player's Cell Click ---
+        function handleCellClick(event) {
+            const clickedCell = event.target;
+            const clickedCellIndex = parseInt(clickedCell.dataset.index);
+
+            if (gameBoardState[clickedCellIndex] !== '' || !isGameActive || currentPlayer !== playerSymbol) {
+                return;
+            }
+
+            updateCell(clickedCell, clickedCellIndex, playerSymbol);
+
+            if (checkWin(playerSymbol)) {
+                endGame(`Player ${playerSymbol} wins! 🎉`);
+                return;
+            }
+            if (isDraw()) {
+                endGame("It's a draw! 🤝");
+                return;
+            }
+
+            switchPlayer();
+        }
+        
+        // --- Update Cell and Game State ---
+        function updateCell(cellElement, index, symbol) {
+            gameBoardState[index] = symbol;
+            cellElement.textContent = symbol;
+            cellElement.classList.add(symbol.toLowerCase());
+            cellElement.disabled = true;
+        }
+
+        // --- Switch Player ---
+        function switchPlayer() {
+            currentPlayer = (currentPlayer === playerSymbol) ? computerSymbol : playerSymbol;
+            statusDisplayElement.textContent = `Player ${currentPlayer}'s turn`;
+
+            if (currentPlayer === computerSymbol && isGameActive) {
+                setTimeout(makeComputerMove, 700);
+            }
+        }
+
+        // --- Computer's Move Logic ---
+        function makeComputerMove() {
+            if (!isGameActive) return;
+
+            const bestMoveIndex = findBestMove();
+
+            if (bestMoveIndex !== -1) {
+                const cellElement = gameBoardElement.children[bestMoveIndex];
+                updateCell(cellElement, bestMoveIndex, computerSymbol);
+
+                if (checkWin(computerSymbol)) {
+                    endGame(`Player ${computerSymbol} (Computer) wins! 🤖`);
+                    return;
+                }
+                if (isDraw()) {
+                    endGame("It's a draw! 🤝");
+                    return;
+                }
+                switchPlayer();
+            }
+        }
+
+        // --- AI: Find Best Move for Computer ---
+        function findBestMove() {
+            // 1. Check if Computer can win
+            for (let i = 0; i < 9; i++) {
+                if (gameBoardState[i] === '') {
+                    gameBoardState[i] = computerSymbol;
+                    if (checkWinCondition(computerSymbol)) {
+                        gameBoardState[i] = '';
+                        return i;
+                    }
+                    gameBoardState[i] = '';
+                }
+            }
+
+            // 2. Check if Player can win (and block them)
+            for (let i = 0; i < 9; i++) {
+                if (gameBoardState[i] === '') {
+                    gameBoardState[i] = playerSymbol;
+                    if (checkWinCondition(playerSymbol)) {
+                        gameBoardState[i] = '';
+                        return i;
+                    }
+                    gameBoardState[i] = '';
+                }
+            }
+
+            // 3. Try to take the center if available
+            if (gameBoardState[4] === '') {
+                return 4;
+            }
+
+            // 4. Try to take a random available corner
+            const corners = [0, 2, 6, 8];
+            const availableCorners = corners.filter(index => gameBoardState[index] === '');
+            if (availableCorners.length > 0) {
+                return availableCorners[Math.floor(Math.random() * availableCorners.length)];
+            }
+
+            // 5. Try to take a random available side
+            const sides = [1, 3, 5, 7];
+            const availableSides = sides.filter(index => gameBoardState[index] === '');
+            if (availableSides.length > 0) {
+                return availableSides[Math.floor(Math.random() * availableSides.length)];
+            }
+            
+            // 6. Fallback: take any available spot
+             const availableCells = [];
+             for(let i=0; i<gameBoardState.length; i++) {
+                 if(gameBoardState[i] === '') availableCells.push(i);
+             }
+             if(availableCells.length > 0) {
+                return availableCells[Math.floor(Math.random() * availableCells.length)];
+             }
+
+            return -1;
+        }
+
+        // --- Check Win Condition (Helper for AI) ---
+        function checkWinCondition(symbol) {
+            for (const combination of winningCombinations) {
+                if (
+                    gameBoardState[combination[0]] === symbol &&
+                    gameBoardState[combination[1]] === symbol &&
+                    gameBoardState[combination[2]] === symbol
+                ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // --- Check for a Winner (Main Game Flow) ---
+        function checkWin(symbolToCheck) {
+            for (let i = 0; i < winningCombinations.length; i++) {
+                const combination = winningCombinations[i];
+                const cellA = gameBoardState[combination[0]];
+                const cellB = gameBoardState[combination[1]];
+                const cellC = gameBoardState[combination[2]];
+
+                if (cellA === symbolToCheck && cellB === symbolToCheck && cellC === symbolToCheck) {
+                    highlightWinningCells(combination);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // --- Check for a Draw ---
+        function isDraw() {
+            return !gameBoardState.includes('');
+        }
+        
+        // --- End Game ---
+        function endGame(message) {
+            isGameActive = false;
+            statusDisplayElement.textContent = message;
+        }
+
+        // --- Highlight Winning Cells ---
+        function highlightWinningCells(winningCombination) {
+            winningCombination.forEach(index => {
+                const cell = gameBoardElement.children[index];
+                if (cell) {
+                    cell.classList.add('winning');
+                }
+            });
+        }
+
+        // --- Restart Game ---
+        function restartGame() {
+            initializeBoard();
+        }
+
+        restartGameButtonElement.addEventListener('click', restartGame);
+        document.addEventListener('DOMContentLoaded', initializeBoard);
+
+    </script>
+</body>
+</html>

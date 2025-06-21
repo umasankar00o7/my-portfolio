@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portfolio</title>
+
+  <!-- External Libraries (Keep these) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+  <style>
+    /* --- NOTE: ALL ORIGINAL CSS IS INCLUDED BELOW --- */
+    /* --- I have only added new styles for the editing interface. --- */
+    :root {
+      --primary-bg: #FDFEFF; --secondary-bg: #F0F4F8; --card-bg: #FFFFFF;
+      --primary-text: #1A202C; --secondary-text: #4A5568; --accent-color: #4F46E5;
+      --accent-color-hover: #4338CA; --accent-color-light: rgba(79, 70, 229, 0.08);
+      --accent-color-rgb: 79, 70, 229; --border-color: #E2E8F0;
+      --shadow-color-umbra: rgba(26, 32, 44, 0.08); --shadow-color-penumbra: rgba(26, 32, 44, 0.05);
+      --font-primary: 'Poppins', sans-serif; --font-secondary: 'Inter', sans-serif;
+      --transition-cubic: cubic-bezier(0.645, 0.045, 0.355, 1); --transition-duration: 0.3s;
+    }
+    body.dark-mode {
+      --primary-bg: #1A202C; --secondary-bg: #2D3748; --card-bg: #252d3a;
+      --primary-text: #E2E8F0; --secondary-text: #A0AEC0; --border-color: #4A5568;
+      --shadow-color-umbra: rgba(0, 0, 0, 0.3); --shadow-color-penumbra: rgba(0, 0, 0, 0.2);
+      --accent-color-light: rgba(var(--accent-color-rgb), 0.15);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-secondary); background-color: var(--primary-bg); color: var(--primary-text); }
+    h1, h2, h3, h4, h5, h6 { font-family: var(--font-primary); color: var(--primary-text); font-weight: 700; letter-spacing: -0.02em;}
+    body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4, body.dark-mode h5, body.dark-mode h6 { color: var(--primary-text); }
+    body.dark-mode p, body.dark-mode li, body.dark-mode label { color: var(--secondary-text); }
+    section { padding: 120px 0; overflow-x: hidden; }
+    section:nth-of-type(even) { background-color: var(--secondary-bg); }
+    .section-title { text-align: center; font-weight: 700; margin-bottom: 3.5rem; font-size: clamp(2.4rem, 6vw, 3.5rem); position: relative; padding-bottom: 1.5rem; }
+    .section-title::after { content: ''; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: 70px; height: 5px; background: linear-gradient(90deg, var(--accent-color), var(--accent-color-hover)); border-radius: 3px; }
+    .navbar.fixed-top { background: rgba(253, 254, 255, 0.92); backdrop-filter: blur(10px); box-shadow: 0 1px 2px var(--shadow-color-umbra); border-bottom: 1px solid var(--border-color); padding: 0.6rem 0; }
+    body.dark-mode .navbar.fixed-top { background: rgba(26, 32, 44, 0.95); border-bottom-color: #3a4454; }
+    .navbar-brand { display: flex; align-items: center; }
+    .navbar-profile-pic-container { width: 42px; height: 42px; border-radius: 50%; overflow: hidden; margin-right: 10px; border: 2px solid var(--accent-color-light); flex-shrink: 0; }
+    .navbar-profile-pic { width: 100%; height: 100%; object-fit: cover; }
+    .navbar-brand-name { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.05em; color: var(--primary-text); }
+    body.dark-mode .navbar-brand-name { color: var(--primary-text); }
+    .hero-section { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; text-align: center; padding-top: 120px; }
+    .hero-section h1 { font-size: clamp(3.2rem, 8vw, 6rem); font-weight: 800; line-height: 1.15; }
+    .hero-section h1 .highlight { color: var(--accent-color); }
+    #about .img-fluid.profile-image-zoomed { width: 340px; height: 460px; object-fit: cover; border-radius: 28px; box-shadow: 0 12px 30px rgba(26, 32, 44, 0.1); }
+    .skill-card-interactive { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; text-align: center; }
+    body.dark-mode .skill-card-interactive { background-color: var(--card-bg); border-color: var(--border-color); }
+    .project-card, .game-card, .certification-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+    body.dark-mode .project-card, body.dark-mode .game-card, body.dark-mode .certification-card { background-color: var(--card-bg); border-color: var(--border-color); }
+    .card-body { flex-grow: 1; display: flex; flex-direction: column; padding: 1.25rem; }
+    .card-body .btn { margin-top: auto; }
+    footer { background-color: var(--secondary-bg); padding: 3rem 1.5rem; text-align: center; border-top: 1px solid var(--border-color); }
+    body.dark-mode footer { background-color: var(--secondary-bg); border-top-color: var(--border-color); }
+    #backToTopBtn { position: fixed; bottom: 25px; right: 25px; z-index: 1029; width: 48px; height: 48px; background-color: var(--accent-color); color: white; border: none; border-radius: 50%; opacity: 0; visibility: hidden; transform: translateY(20px); transition: all 0.3s; display: flex; align-items: center; justify-content: center; font-size: 1.7rem; }
+    #backToTopBtn.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+    
+    /* --- NEW STYLES FOR EDITING INTERFACE --- */
+    .fab-edit-mode {
+      position: fixed; bottom: 85px; right: 25px; z-index: 1029;
+      width: 48px; height: 48px; background-color: #f39c12; color: white;
+      border: none; border-radius: 50%; font-size: 1.2rem; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      display: flex; align-items: center; justify-content: center; transition: all 0.3s;
+    }
+    .fab-edit-mode:hover { background-color: #e67e22; transform: scale(1.1); }
+    #settingsModal .modal-body { background-color: var(--secondary-bg); }
+    body.dark-mode #settingsModal .modal-body { background-color: var(--primary-bg); }
+    .list-item-card {
+        background-color: var(--card-bg); border: 1px solid var(--border-color);
+        border-radius: 8px; padding: 1rem; position: relative;
+    }
+    .list-item-card .btn-delete-item { position: absolute; top: 0.5rem; right: 0.5rem; line-height: 1; }
+    #imagePreview { max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid var(--border-color); object-fit: cover; }
+    .theme-toggle-container{display:flex;align-items:center}.theme-checkbox{opacity:0;position:absolute}.theme-toggle-label{width:55px;height:28px;background-color:var(--secondary-bg);display:flex;align-items:center;justify-content:space-around;border-radius:50px;padding:4px;cursor:pointer;position:relative;transition:background-color .3s ease}.theme-toggle-label .theme-ball{width:20px;height:20px;background-color:#fff;position:absolute;top:4px;left:4px;border-radius:50%;transition:transform .3s ease}.theme-checkbox:checked+.theme-toggle-label .theme-ball{transform:translateX(27px)}.theme-toggle-label .fa-sun{color:#f39c12}.theme-toggle-label .fa-moon{color:var(--secondary-text)}body.dark-mode .theme-toggle-label{background-color:#4A5568}body.dark-mode .theme-toggle-label .fa-moon{color:#f1c40f!important}body.dark-mode .theme-toggle-label .fa-sun{color:#718096!important}
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <div class="navbar-profile-pic-container">
+          <img src="" alt="Profile Picture" class="navbar-profile-pic" id="profilePicNav"/>
+        </div>
+        <span class="navbar-brand-name" id="userNameNav"></span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="#skills">Skills</a></li>
+          <li class="nav-item"><a class="nav-link" href="#projects">Projects</a></li>
+          <li class="nav-item"><a class="nav-link" href="#certifications">Certifications</a></li>
+          <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+        </ul>
+        <div class="theme-toggle-container ms-lg-3">
+            <input type="checkbox" class="theme-checkbox" id="themeToggleCheckbox" aria-label="Toggle theme"><label for="themeToggleCheckbox" class="theme-toggle-label"><i class="fas fa-moon"></i><i class="fas fa-sun"></i><span class="theme-ball"></span></label>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero-section">
+    <div class="container" data-aos="fade-in">
+      <h1 id="heroTitle"></h1>
+      <p><span id="heroTagline" class="fs-4 text-secondary"></span></p>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="container">
+      <h2 class="section-title" data-aos="fade-up">About Me</h2>
+      <div class="row align-items-center justify-content-center gy-5">
+        <div class="col-md-5 col-lg-4 text-center" data-aos="fade-right">
+          <img src="" alt="Profile Picture" class="img-fluid profile-image-zoomed" id="profilePicAbout" />
+        </div>
+        <div class="col-md-7 col-lg-6" data-aos="fade-left">
+          <h3 class="mb-3" id="aboutTitle"></h3>
+          <div id="aboutMeText"></div>
+          <div class="d-flex flex-wrap gap-3 mt-4" id="aboutLinks"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="container">
+      <h2 class="section-title" data-aos="fade-up">My Skills</h2>
+      <h3 class="text-center mb-4" data-aos="fade-up">Technical Skills</h3>
+      <div id="technicalSkillsContainer" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-4 justify-content-center"></div>
+      <h3 class="text-center mb-4 mt-5 pt-3" data-aos="fade-up">Professional Skills</h3>
+      <div id="professionalSkillsContainer" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-4 justify-content-center"></div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="container">
+      <h2 class="section-title" data-aos="fade-up">My Projects</h2>
+      <div id="projectsContainer" class="row g-4 g-lg-5"></div>
+    </div>
+  </section>
+
+  <!-- This 'My Games' section is hard-coded and not part of the editable template, as requested -->
+  <section id="games">
+    <div class="container">
+      <h2 class="section-title" data-aos="fade-up">My Games</h2>
+      <div class="row g-4 g-lg-5 justify-content-center">
+        <div class="col-md-6 col-lg-4" data-aos="zoom-in" data-aos-delay="100"><div class="card game-card"><div class="card-body text-center"><div><i class="bi bi-grid-3x3-gap-fill fs-1 mb-3"></i><h5 class="card-title">Tic Tac Toe</h5><p class="card-text">A classic 3x3 Tic Tac Toe game built with HTML, CSS, and JavaScript.</p></div><a href="TicTacToe.html" class="btn btn-primary mt-auto">Play Now <i class="fas fa-gamepad ms-2" style="font-size: 0.8em;"></i></a></div></div></div>
+        <div class="col-md-6 col-lg-4" data-aos="zoom-in" data-aos-delay="200"><div class="card game-card"><div class="card-body text-center"><div><i class="bi bi-controller fs-1 mb-3"></i><h5 class="card-title">Snake Game</h5><p class="card-text">A smooth and interactive JavaScript Snake game with score tracking and keyboard controls.</p></div><a href="SnakeGame.html" class="btn btn-primary mt-auto">Play Now <i class="fas fa-gamepad ms-2" style="font-size: 0.8em;"></i></a></div></div></div>
+        <div class="col-md-6 col-lg-4" data-aos="zoom-in" data-aos-delay="300"><div class="card game-card"><div class="card-body text-center"><div><i class="bi bi-circle-fill fs-1 mb-3"></i></div><h5 class="card-title">Keep the Ball up!</h5><p class="card-text">A Fun and challenging paddle game. How long can you last?</p><a href="BallGame/ball.html" class="btn btn-primary mt-auto">Play Now</a></div></div></div>
+      </div>
+    </div>
+  </section>
+  
+  <section id="certifications">
+    <div class="container">
+      <h2 class="section-title" data-aos="fade-up">My Certifications</h2>
+      <div id="certificationsContainer" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center"></div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="container text-center">
+        <h2 class="section-title" data-aos="fade-up">Get In Touch</h2>
+        <p class="lead" data-aos="fade-up" data-aos-delay="100">Have a project in mind, a question, or just want to connect? Feel free to reach out!</p>
+        <div class="d-flex flex-wrap justify-content-center gap-3 mt-4" data-aos="fade-up" data-aos-delay="200" id="contactLinks"></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container text-center">
+      <p class="mb-1">Designed & Built by <span id="footerName"></span></p>
+      <p class="mb-0">© <span id="currentYear"></span> All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <button id="backToTopBtn" title="Go to top"><i class="bi bi-arrow-up-short"></i></button>
+
+  <button id="editModeToggle" class="fab-edit-mode" title="Customize Portfolio"><i class="fas fa-pencil-alt"></i></button>
+
+  <div class="modal fade" id="settingsModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Customize Your Portfolio</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <div class="alert alert-info small"><i class="fas fa-info-circle me-2"></i>Your changes are saved automatically in this browser. To see the default portfolio again, use the "Reset" button.</div>
+            <div class="accordion" id="settingsAccordion">
+                
+                <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProfile">Profile & Links</button></h2><div id="collapseProfile" class="accordion-collapse collapse show" data-bs-parent="#settingsAccordion"><div class="accordion-body"><div class="row"><div class="col-md-6 mb-3"><label class="form-label">Name</label><input type="text" class="form-control" data-path="profile.name"><label class="form-label mt-3">Tagline</label><input type="text" class="form-control" data-path="profile.tagline"><label class="form-label mt-3">About Me Title</label><input type="text" class="form-control" data-path="profile.aboutTitle"><label class="form-label mt-3">About Me Text (HTML allowed)</label><textarea class="form-control" rows="8" data-path="profile.aboutText"></textarea></div><div class="col-md-6 mb-3"><label class="form-label">Profile Picture (will be resized)</label><input class="form-control" type="file" id="profilePicInput" accept="image/*"><img id="imagePreview" src="#" alt="Image Preview" class="mt-2" style="display: none;"/><hr><label class="form-label mt-3">GitHub URL</label><input type="url" class="form-control" data-path="contact.github"><label class="form-label mt-3">LinkedIn URL</label><input type="url" class="form-control" data-path="contact.linkedin"><label class="form-label mt-3">Resume URL</label><input type="url" class="form-control" data-path="contact.resume"><label class="form-label mt-3">Email Address</label><input type="email" class="form-control" data-path="contact.email"></div></div></div></div></div>
+                <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSkills">Skills</button></h2><div id="collapseSkills" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion"><div class="accordion-body"><div id="skills-list-editor" class="d-grid gap-3"></div><button type="button" class="btn btn-outline-primary mt-3" id="add-skill-btn"><i class="fas fa-plus me-2"></i>Add Skill</button></div></div></div>
+                <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProjects">Projects</button></h2><div id="collapseProjects" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion"><div class="accordion-body"><div id="projects-list-editor" class="d-grid gap-3"></div><button type="button" class="btn btn-outline-primary mt-3" id="add-project-btn"><i class="fas fa-plus me-2"></i>Add Project</button></div></div></div>
+                <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCerts">Certifications</button></h2><div id="collapseCerts" class="accordion-collapse collapse" data-bs-parent="#settingsAccordion"><div class="accordion-body"><div id="certs-list-editor" class="d-grid gap-3"></div><button type="button" class="btn btn-outline-primary mt-3" id="add-cert-btn"><i class="fas fa-plus me-2"></i>Add Certification</button></div></div></div>
+            
+            </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+            <button type="button" id="resetSettingsButton" class="btn btn-outline-danger">Reset to Default</button>
+            <div>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="saveSettingsButton" class="btn btn-primary"><i class="fas fa-save me-2"></i>Save and Reload</button>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+
+  <script>
+    // =================================================================== //
+    //          PORTFOLIO ENGINE & CONTENT MANAGEMENT SYSTEM (CMS)         //
+    //                   Version 2.0 - With Image Compression              //
+    // =================================================================== //
+    
+    // --- REGION: DEFAULT DATA OBJECT ---
+    const portfolioData = {
+        profile: {
+            name: "Uma Sankar K",
+            tagline: "Java Full Stack Developer",
+            profilePicURL: "https://res.cloudinary.com/dljmxltfr/image/upload/v1748052241/IMG_20250521_104303968_HDR_acl4am.jpg",
+            aboutTitle: "A Passionate Developer & Innovator",
+            aboutText: `<p>Driven by a relentless curiosity for technology and a commitment to clean, high-performance code, I thrive on transforming complex challenges into elegant digital solutions.</p><p>My focus is on engineering robust, scalable backends and intuitive, responsive frontends. I excel in optimizing system efficiency, enhancing user experience, and driving successful project outcomes.</p>`
+        },
+        contact: {
+            email: "kontyanaumasankararao@gmail.com",
+            github: "https://github.com/umasankar00o7",
+            linkedin: "https://www.linkedin.com/in/uma-sankara-rao-kontyana-a97a3a243/",
+            resume: "https://drive.google.com/file/d/1q_3Sq32euBQgJSxsU2lEVdOtHfW8-wtp/view?usp=sharing"
+        },
+        skills: [
+            { id: 1, name: "Java", icon: "bi bi-cup-hot-fill", category: "technical" }, { id: 2, name: "Spring Boot", icon: "bi bi-box-seam", category: "technical" },
+            { id: 3, name: "MySQL", icon: "bi bi-database-fill", category: "technical" }, { id: 4, name: "JavaScript", icon: "bi bi-filetype-js", category: "technical" },
+            { id: 5, name: "React.js", icon: "bi bi-fan", category: "technical" }, { id: 6, name: "HTML5 & CSS3", icon: "bi bi-filetype-html", category: "technical" },
+            { id: 7, name: "Firebase", icon: "bi bi-fire", category: "technical" }, { id: 8, name: "Git & GitHub", icon: "bi bi-git", category: "technical" },
+            { id: 9, name: "Problem Solving", icon: "bi bi-lightbulb-fill", category: "professional" }, { id: 10, name: "Communication", icon: "bi bi-chat-dots-fill", category: "professional" },
+            { id: 11, name: "Teamwork", icon: "bi bi-people-fill", category: "professional" }, { id: 12, name: "Adaptability", icon: "bi bi-shuffle", category: "professional" },
+        ],
+        projects: [
+            { id: 1, title: "Code Archive", description: "A Firebase-powered code snippet manager with search, dark mode, and a modern UI.", tech: "HTML, CSS, JS, Firebase", link: "https://umasankar00o7.github.io/code-archive/", image: "" },
+            { id: 2, title: "Smart Banking System", description: "A foundational mini banking application demonstrating core banking operations like secure transactions and account management.", tech: "Java, JSP, Servlets, MySQL", link: "", image: "" },
+            { id: 3, title: "Learning Journal", description: "Track 100 days of coding using Firebase with topics, code snippets, and links.", tech: "HTML, CSS, JS, Bootstrap", link: "journal/journal.html", image: "" }
+        ],
+        certifications: [
+            { id: 1, title: "Java Full Stack Developer", issuer: "Jspiders", date: "Jan 2023", image: "https://res.cloudinary.com/dljmxltfr/image/upload/v1748753601/Screenshot_2025-06-01_102258_l3myfj.png", link: "https://drive.google.com/file/d/19sf9A5U6xL2WJ4GNGat_KPgm7uQVdCbj/view?usp=sharing" },
+            { id: 2, title: "Artificial Intelligence", issuer: "IBM", date: "Apr 2024", image: "https://res.cloudinary.com/dljmxltfr/image/upload/v1748753725/Screenshot_2025-06-01_102504_xiwpnx.png", link: "https://drive.google.com/file/d/157i9GFFDtq07F_41fngxB60PaDlTZYnj/view?usp=sharing" },
+            { id: 3, title: "React.js", issuer: "Infosys", date: "Feb 2024", image: "https://res.cloudinary.com/dljmxltfr/image/upload/v1748753180/Screenshot_2025-06-01_101550_gsuwa3.png", link: "https://drive.google.com/file/d/15IMHHbqy3FgZAEdWRiZKpSHHhPEEk7NG/view?usp=sharing" }
+        ]
+    };
+
+    // --- REGION: CORE APPLICATION LOGIC ---
+    document.addEventListener('DOMContentLoaded', () => {
+        initApp();
+    });
+
+    function initApp() {
+        let activeData = portfolioData;
+        const savedDataString = localStorage.getItem('userPortfolioData');
+        if (savedDataString) {
+            try {
+                activeData = JSON.parse(savedDataString);
+            } catch (e) { console.error("Could not parse saved data, using default.", e); }
+        }
+        renderAll(activeData);
+        setupEventListeners(activeData);
+        AOS.init({ duration: 700, once: true, offset: 80 });
+    }
+
+    // --- REGION: DYNAMIC RENDERING FUNCTIONS ---
+    function renderAll(data) {
+        renderProfile(data.profile, data.contact);
+        renderSkills(data.skills);
+        renderProjects(data.projects);
+        renderCertifications(data.certifications);
+        renderFooter(data.profile.name);
+    }
+    
+    function renderProfile(profile, contact) {
+        document.getElementById('profilePicNav').src = profile.profilePicURL;
+        document.getElementById('profilePicAbout').src = profile.profilePicURL;
+        document.getElementById('userNameNav').textContent = profile.name;
+        document.getElementById('heroTitle').innerHTML = `Hi, I'm <span class="highlight">${profile.name}</span>`;
+        document.getElementById('heroTagline').textContent = profile.tagline;
+        document.getElementById('aboutTitle').textContent = profile.aboutTitle;
+        document.getElementById('aboutMeText').innerHTML = profile.aboutText;
+        document.getElementById('aboutLinks').innerHTML = `<a href="${contact.github}" target="_blank" class="btn btn-dark">GitHub</a><a href="${contact.linkedin}" target="_blank" class="btn btn-primary">LinkedIn</a><a href="${contact.resume}" target="_blank" class="btn btn-outline-primary">Resume</a>`;
+        document.getElementById('contactLinks').innerHTML = `<a href="${contact.github}" target="_blank" class="btn btn-lg btn-outline-dark">GitHub</a><a href="${contact.linkedin}" target="_blank" class="btn btn-lg btn-outline-primary">LinkedIn</a><a href="mailto:${contact.email}" class="btn btn-lg btn-outline-secondary">Email</a>`;
+    }
+
+    function renderSkills(skills) {
+        const techContainer = document.getElementById('technicalSkillsContainer');
+        const profContainer = document.getElementById('professionalSkillsContainer');
+        techContainer.innerHTML = profContainer.innerHTML = '';
+        (skills || []).forEach(skill => {
+            const skillHTML = `<div class="col" data-aos="fade-up"><div class="skill-card-interactive h-100"><i class="${skill.icon} fs-1 text-primary mb-3"></i><h6>${skill.name}</h6></div></div>`;
+            if (skill.category === 'technical') techContainer.innerHTML += skillHTML;
+            else profContainer.innerHTML += skillHTML;
+        });
+    }
+
+    function renderProjects(projects) {
+        document.getElementById('projectsContainer').innerHTML = (projects || []).map(p => `
+            <div class="col-md-6 col-lg-4"><div class="card project-card"><div class="card-body">
+            <h5 class="card-title">${p.title}</h5><p class="card-text">${p.description}</p>
+            <p><small class="text-muted">Tech: ${p.tech}</small></p>
+            ${p.link ? `<a href="${p.link}" target="_blank" class="btn btn-primary">View Project</a>` : ''}
+            </div></div></div>`).join('');
+    }
+
+    function renderCertifications(certs) {
+        document.getElementById('certificationsContainer').innerHTML = (certs || []).map(c => `
+            <div class="col"><div class="certification-card text-center">
+            <img src="${c.image}" class="card-img-top" alt="${c.title}" style="height:180px; object-fit:cover;">
+            <div class="card-body"><h5 class="card-title">${c.title}</h5><p class="card-text">${c.issuer} - ${c.date}</p>
+            <a href="${c.link}" target="_blank" class="btn btn-outline-primary">View Credential</a>
+            </div></div></div>`).join('');
+    }
+    
+    function renderFooter(name){
+        document.getElementById('footerName').textContent = name;
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    }
+    
+    // --- REGION: EVENT LISTENERS & UI INTERACTIVITY ---
+    function setupEventListeners(initialData) {
+        const themeToggle = document.getElementById('themeToggleCheckbox');
+        const currentTheme = localStorage.getItem('portfolioTheme') || 'light';
+        document.body.classList.toggle('dark-mode', currentTheme === 'dark');
+        themeToggle.checked = currentTheme === 'dark';
+        themeToggle.addEventListener('change', () => {
+            document.body.classList.toggle('dark-mode', themeToggle.checked);
+            localStorage.setItem('portfolioTheme', themeToggle.checked ? 'dark' : 'light');
+        });
+
+        const backToTopBtn = document.getElementById('backToTopBtn');
+        window.addEventListener('scroll', () => backToTopBtn.classList.toggle('visible', window.scrollY > 300));
+        backToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+        const settingsModalEl = document.getElementById('settingsModal');
+        if (!settingsModalEl) return;
+        const settingsModal = new bootstrap.Modal(settingsModalEl);
+        document.getElementById('editModeToggle').addEventListener('click', () => {
+            const currentData = JSON.parse(localStorage.getItem('userPortfolioData')) || portfolioData;
+            populateSettingsModal(currentData);
+            settingsModal.show();
+        });
+
+        document.getElementById('saveSettingsButton').addEventListener('click', saveSettings);
+        document.getElementById('resetSettingsButton').addEventListener('click', resetSettings);
+        document.getElementById('profilePicInput').addEventListener('change', handleImageUpload);
+        document.getElementById('add-skill-btn').addEventListener('click', () => addListItemToEditor('skill'));
+        document.getElementById('add-project-btn').addEventListener('click', () => addListItemToEditor('project'));
+        document.getElementById('add-cert-btn').addEventListener('click', () => addListItemToEditor('cert'));
+    }
+
+    // --- REGION: SETTINGS MODAL & DATA MANAGEMENT ---
+    function populateSettingsModal(data) {
+        document.querySelectorAll('#settingsModal [data-path]').forEach(input => {
+            const path = input.dataset.path.split('.');
+            const value = path.reduce((obj, key) => (obj && obj[key] !== undefined) ? obj[key] : '', data);
+            if (input.type === 'file') { input.value = ''; } else { input.value = value; }
+        });
+        const preview = document.getElementById('imagePreview');
+        preview.src = data.profile.profilePicURL;
+        preview.style.display = 'block';
+        preview.removeAttribute('data-compressed'); // Reset compressed flag
+
+        populateListEditor('skills-list-editor', data.skills, 'skill');
+        populateListEditor('projects-list-editor', data.projects, 'project');
+        populateListEditor('certs-list-editor', data.certifications, 'cert');
+    }
+
+    function saveSettings() {
+        const newSavedData = {};
+        document.querySelectorAll('#settingsModal [data-path]').forEach(input => {
+            const path = input.dataset.path.split('.');
+            let current = newSavedData;
+            path.forEach((key, index) => {
+                if (index === path.length - 1) current[key] = input.value;
+                else { current[key] = current[key] || {}; current = current[key]; }
+            });
+        });
+        
+        const imagePreview = document.getElementById('imagePreview');
+        // Always save the src of the preview. If a new image was uploaded and compressed, it will be a new base64 string.
+        // If not, it will be the original URL that was populated.
+        newSavedData.profile.profilePicURL = imagePreview.src;
+        
+        newSavedData.skills = saveListFromEditor('skills-list-editor');
+        newSavedData.projects = saveListFromEditor('projects-list-editor');
+        newSavedData.certifications = saveListFromEditor('certs-list-editor');
+
+        try {
+            localStorage.setItem('userPortfolioData', JSON.stringify(newSavedData));
+            alert('Settings saved! The page will now reload.');
+            window.location.reload();
+        } catch (e) {
+            if (e.name === 'QuotaExceededError') {
+                alert('Error: Could not save settings. The data is too large for browser storage. This can happen with very large "About Me" text or many items. Please try reducing the amount of text or use smaller images.');
+            } else {
+                alert('An unknown error occurred while saving.');
+            }
+            console.error("Save failed:", e);
+        }
+    }
+    
+    function resetSettings() {
+        if (confirm('Are you sure you want to erase all customizations?')) {
+            localStorage.removeItem('userPortfolioData');
+            alert('Portfolio reset. The page will now reload.');
+            window.location.reload();
+        }
+    }
+    
+    // <<< FIX: Image handling now includes compression.
+    function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const preview = document.getElementById('imagePreview');
+        preview.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"; // Transparent placeholder
+        preview.style.display = 'block';
+
+        resizeAndCompressImage(file, 500, 0.8) // Max 500px, 80% quality
+            .then(compressedBase64 => {
+                preview.src = compressedBase64;
+            })
+            .catch(error => {
+                alert("Could not process image. Please try another one.");
+                console.error(error);
+                preview.style.display = 'none';
+            });
+    }
+
+    // <<< NEW: Professional-grade image compression utility function.
+    function resizeAndCompressImage(file, maxSize, quality) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let { width, height } = img;
+                    if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } } 
+                    else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = (error) => reject(error);
+            };
+            reader.onerror = (error) => reject(error);
+        });
+    }
+    
+    // --- REGION: DYNAMIC LIST EDITOR ---
+    function getListItemTemplate(type, item = {}) {
+        const id = item.id || Date.now();
+        switch (type) {
+            case 'skill':
+                return `<div class="list-item-card" data-id="${id}"><button type="button" class="btn-close btn-delete-item"></button><div class="row"><div class="col-md-6"><label>Skill Name</label><input type="text" class="form-control" data-key="name" value="${item.name||''}"></div><div class="col-md-6"><label>Icon Class</label><input type="text" class="form-control" data-key="icon" value="${item.icon||''}"></div><div class="col-12 mt-2"><label>Category</label><select class="form-select" data-key="category"><option value="technical" ${item.category==='technical'?'selected':''}>Technical</option><option value="professional" ${item.category==='professional'?'selected':''}>Professional</option></select></div></div></div>`;
+            case 'project':
+                // <<< UPGRADE: Added image URL field for projects
+                return `<div class="list-item-card" data-id="${id}"><button type="button" class="btn-close btn-delete-item"></button><label>Title</label><input type="text" class="form-control mb-2" data-key="title" value="${item.title||''}"><label>Description</label><textarea class="form-control mb-2" data-key="description">${item.description||''}</textarea><label>Tech Used</label><input type="text" class="form-control mb-2" data-key="tech" value="${item.tech||''}"><label>Live Link</label><input type="url" class="form-control mb-2" data-key="link" value="${item.link||''}"><label>Image URL</label><input type="url" class="form-control" data-key="image" value="${item.image||''}"></div>`;
+            case 'cert':
+                 return `<div class="list-item-card" data-id="${id}"><button type="button" class="btn-close btn-delete-item"></button><div class="row g-2"><div class="col-md-6"><label>Title</label><input type="text" class="form-control" data-key="title" value="${item.title||''}"></div><div class="col-md-6"><label>Issuer</label><input type="text" class="form-control" data-key="issuer" value="${item.issuer||''}"></div><div class="col-md-6"><label>Date</label><input type="text" class="form-control" data-key="date" value="${item.date||''}"></div><div class="col-md-6"><label>Image URL</label><input type="url" class="form-control" data-key="image" value="${item.image||''}"></div><div class="col-12"><label>Credential Link</label><input type="url" class="form-control" data-key="link" value="${item.link||''}"></div></div></div>`;
+            default: return '';
+        }
+    }
+    
+    function populateListEditor(containerId, items, type) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        (items || []).forEach(item => container.insertAdjacentHTML('beforeend', getListItemTemplate(type, item)));
+        container.addEventListener('click', e => {
+            if (e.target.classList.contains('btn-delete-item')) e.target.closest('.list-item-card').remove();
+        });
+    }
+    
+    function addListItemToEditor(type) {
+        const containerId = type === 'skill' ? 'skills-list-editor' : (type === 'project' ? 'projects-list-editor' : 'certs-list-editor');
+        document.getElementById(containerId).insertAdjacentHTML('beforeend', getListItemTemplate(type));
+    }
+    
+    function saveListFromEditor(containerId) {
+        const items = [];
+        document.querySelectorAll(`#${containerId} .list-item-card`).forEach(card => {
+            const item = { id: card.dataset.id };
+            card.querySelectorAll('[data-key]').forEach(input => item[input.dataset.key] = input.value);
+            items.push(item);
+        });
+        return items;
+    }
+  </script>
+
+</body>
+</html>
