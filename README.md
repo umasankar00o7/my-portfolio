@@ -78,7 +78,7 @@ The AI Learning Roadmap is fully dynamic and can be updated without touching the
 
 1.  Navigate to `admin.html` in your browser.
 2.  You will be prompted for a password.
-3.  The password is hard-coded in `admin.html` for this project's demonstration purposes: **data_journey_2024**.
+3.  The password is hard-coded in `admin.html` for this project's demonstration purposes: **xxxx_journey_2024**.
 4.  Once logged in, you can add new weekly entries, edit existing ones, or delete them. All changes are saved directly to Firebase and will reflect on the live `currentPG.html` page immediately.
 
 ## 🤝 Connect with Me
