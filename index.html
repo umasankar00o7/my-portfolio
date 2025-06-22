@@ -2911,7 +2911,84 @@ body.dark-mode .progress.learning-progress {
   }
 }
 /* === END: CURRENT LEARNING JOURNEY STYLING (FINAL) === */
+/* === START: COMPACT & CUTE METRICS STYLING === */
+#portfolio-stats-compact {
+  padding: 60px 0 100px 0; /* Creates space around the component */
+  background-color: transparent; /* Seamlessly blends with the page */
+}
 
+.stat-item-compact {
+  text-align: center;
+}
+
+.stat-number-compact {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 1.75rem; /* Reduced font size for a more subtle look */
+  color: var(--primary-text);
+  line-height: 1.2;
+}
+
+.stat-label-compact {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--secondary-text);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-divider {
+  height: 35px; /* Controls the height of the line */
+  width: 1.5px; /* Controls the thickness */
+  background-color: var(--border-color);
+  border-radius: 1px;
+  margin: 0 1rem; /* Space on either side of the divider */
+}
+
+/* Dark Mode Adjustments */
+body.dark-mode .stat-number-compact {
+  color: var(--primary-text);
+}
+body.dark-mode .stat-label-compact {
+  color: var(--secondary-text);
+}
+body.dark-mode .stat-divider {
+  background-color: var(--border-color);
+}
+/* === START: VIBRANT STAT NUMBER STYLING (FINAL POLISH) === */
+
+/* Define a subtle, shimmering animation for the gradient */
+@keyframes gradient-animation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.stat-number-compact {
+  /* Create a vibrant gradient from an energetic orange to a modern pink */
+  background: linear-gradient(45deg, #F97316, #EC4899);
+  
+  /* This is the magic trick: it clips the background to the shape of the text */
+  -webkit-background-clip: text;
+  background-clip: text;
+  
+  /* This makes the text itself transparent, revealing the gradient background underneath */
+  -webkit-text-fill-color: transparent;
+  
+  /* Apply the shimmering animation to make it feel alive */
+  background-size: 200% 200%;
+  animation: gradient-animation 4s ease-in-out infinite;
+}
+
+/* On dark mode, we can use slightly brighter colors for even more pop */
+body.dark-mode .stat-number-compact {
+  background: linear-gradient(45deg, #fb923c, #f472b6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+/* === END: VIBRANT STAT NUMBER STYLING === */
+/* === END: COMPACT & CUTE METRICS STYLING === */
   </style>
 </head>
 <body>
@@ -3038,7 +3115,30 @@ body.dark-mode .progress.learning-progress {
     </div>
   </div>
 </section>
-
+<!-- === START: COMPACT METRICS SECTION === -->
+<div id="portfolio-stats-compact" class="container text-center">
+  <div class="row justify-content-center">
+    <!-- Portfolio Views -->
+    <div class="col-auto">
+      <div class="stat-item-compact">
+        <span class="stat-number-compact" id="animatedViewsCount">0</span>
+        <span class="stat-label-compact">Views</span>
+      </div>
+    </div>
+    <!-- Vertical Divider -->
+    <div class="col-auto d-flex align-items-center">
+      <div class="stat-divider"></div>
+    </div>
+    <!-- Portfolio Shares -->
+    <div class="col-auto">
+      <div class="stat-item-compact">
+        <span class="stat-number-compact" id="animatedSharesCount">0</span>
+        <span class="stat-label-compact">Shares</span>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- === END: COMPACT METRICS SECTION === -->
 <section id="skills">
   <div class="container">
     <h2 class="section-title" data-aos="fade-up">My Skills</h2>
@@ -5331,7 +5431,65 @@ Time to connect and build something amazing! 🔥
     card.style.setProperty('--mouse-x', `${x}px`);
     card.style.setProperty('--mouse-y', `${y}px`);
   }
+// === START: FINAL, RE-ANIMATING STATS LOGIC ===
+function animateStat(element, finalValue, duration = 1500) {
+    if (!element) return;
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const currentValue = Math.floor(progress * finalValue);
+        element.textContent = currentValue.toLocaleString();
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
 
+function initializeAnimatedStats() {
+    const statsSection = document.getElementById('portfolio-stats-compact');
+    if (!statsSection) return;
+
+    // These are the hidden source elements that Firebase updates
+    const viewsSource = document.getElementById('heroViewCountDisplay');
+    const sharesSource = document.getElementById('portfolioShareCountDisplay');
+    
+    // These are the visible elements we want to animate
+    const viewsTarget = document.getElementById('animatedViewsCount');
+    const sharesTarget = document.getElementById('animatedSharesCount');
+    
+    if (!viewsSource || !sharesSource || !viewsTarget || !sharesTarget) {
+        console.warn("One or more stat elements are missing. Animation disabled.");
+        return;
+    }
+
+    // This is a professional way to only run the animation when the user sees it.
+    const observer = new IntersectionObserver((entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting) {
+            // When the section is visible, get the latest numbers and animate
+            const finalViews = parseInt(viewsSource.textContent.replace(/,/g, ''), 10) || 0;
+            const finalShares = parseInt(sharesSource.textContent.replace(/,/g, ''), 10) || 0;
+            
+            animateStat(viewsTarget, finalViews);
+            animateStat(sharesTarget, finalShares);
+        } else {
+            // When the section is NOT visible, reset the numbers to 0
+            // so they are ready to animate again next time.
+            viewsTarget.textContent = '0';
+            sharesTarget.textContent = '0';
+        }
+    }, { 
+        threshold: 0.5 // Trigger when 50% of the section is visible
+    });
+
+    observer.observe(statsSection);
+}
+
+// Ensure this is called when the DOM is ready
+document.addEventListener('DOMContentLoaded', initializeAnimatedStats);
+// === END: FINAL, RE-ANIMATING STATS LOGIC ===
 })();
 </script>
 
